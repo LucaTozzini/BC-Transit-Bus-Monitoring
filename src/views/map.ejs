@@ -1,0 +1,35 @@
+<!-- https://leafletjs.com/ -->
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- Leaflet CSS -->
+        <link 
+            rel="stylesheet" 
+            href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css"
+            integrity="sha256-kLaT2GOSpHechhsozzB+flnD+zUyjE2LlfWPgU04xyI="
+            crossorigin=""
+        />
+        <!-- Style -->
+        <link rel="stylesheet" href="/css/map.css">
+    </head>
+    <body>
+        <div id="main-container">
+            <div id="map"></div> 
+            <div id="sidePanel">
+                <div id="searchBar">
+                    <input type='text' id="searchBar-text" placeholder="Search Bus Stop...">
+                    <button id="searchBar-button"></button>
+
+                </div>
+            </div>
+        </div>
+    </body>
+    <!-- Leaflet JS -->
+    <script 
+        src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"
+        integrity="sha256-WBkoXOwTeyKclOHuWtc+i2uENFpDZ9YPdf5Hf+D7ewM="
+        crossorigin="">
+    </script>
+    <script src="/scripts/map.scripts.js"></script>
+</html>

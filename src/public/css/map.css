@@ -1,0 +1,55 @@
+*{
+    padding: 0;
+    margin: 0;
+    outline: none;
+    border: none;
+}
+
+body{
+    height: 100vh;
+    width: 100vw;
+    display: flex;
+}
+
+#main-container{
+    display: flex;
+    flex: 1;
+}
+
+#map { 
+    flex: 1;
+}
+#sidePanel{
+    background-color: rgb(37, 37, 37);
+    height: 100%;
+    width: 30rem;
+    box-sizing: border-box;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#searchBar{
+    display: flex;
+    gap: .2rem;
+    height: 3rem;
+    width: 100%;
+}
+
+#searchBar-text{
+    flex: 1;
+    background-color: white;
+    border-radius: .2rem;
+    padding: 0 .7rem;
+    font-size: 1rem;
+    font-weight: bolder;
+}
+
+#searchBar-button{
+    height: 3rem;
+    width: 3rem;
+    border-radius: .2rem;
+    background-color: rgb(57, 57, 255);
+    cursor: pointer;
+}
