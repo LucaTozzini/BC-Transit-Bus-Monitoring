@@ -1,14 +1,13 @@
 // Thanks ChatGPT
-
 import fs from 'fs';
-import https from 'https';
+import http from 'http';
 
 function downloadFile(fileUrl, filePath) {
   return new Promise((resolve) => {
     const file = fs.createWriteStream(filePath);
 
     file.on('open', () => {
-      https.get(fileUrl, (response) => {
+      http.get(fileUrl, (response) => {
         file.on('error', (error) => {
           console.error(error);
           resolve(500);
@@ -23,7 +22,9 @@ function downloadFile(fileUrl, filePath) {
 
           // Write the new content to the file
           response.pipe(file);
-          resolve(201);
+          file.on('finish', () => {
+            resolve(201);
+          })
         });
       });
     });

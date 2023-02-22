@@ -1,6 +1,6 @@
 import express from 'express';
-import gtfsTrip from '../helpers/gtfs-trip.helpers.js'
-import gtfsPosition from '../helpers/gtfs-position.helpers.js';
+import gtfTrip from '../helpers/gtf-trip.helpers.js'
+import gtfPosition from '../helpers/gtf-position.helpers.js';
 
 import getMapBounds from '../middleware/get-mapBounds.middleware.js'
 import getStops from '../middleware/get-stops.middleware.js';
@@ -10,7 +10,7 @@ const router = express.Router()
 
 router.get('/trip-updates', async (req, res) => {
     try{
-        const data = await gtfsTrip();
+        const data = await gtfTrip();
         if(data == 500){
             throw new Error();
         }
@@ -23,7 +23,7 @@ router.get('/trip-updates', async (req, res) => {
 
 router.get('/positions', async (req, res) => {
     try{
-        const data = await gtfsPosition();
+        const data = await gtfPosition();
         if(data == 500){
             throw new Error();
         }

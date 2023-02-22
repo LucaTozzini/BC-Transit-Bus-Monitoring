@@ -1,7 +1,7 @@
 import csvtojson from 'csvtojson';
 import openDatabase from './open-database.helpers.js';
 
-const stopsTxt = 'C:/Users/luca_/OneDrive/Desktop/bus_ml_api/data/stops.txt';
+const stopsTxt = 'C:/Users/luca_/github/BC-Transit-Bus-Monitoring/data/stops.txt';
 const db = openDatabase()
 db.run(`CREATE TABLE stops(
     id INTEGER PRIMARY KEY,
