@@ -54,10 +54,21 @@ const goTo = {
         const json = await data.json();
         const position = [json.lat, json.lng];
         map.flyTo(position, 19);
+        return json
     }
 }
 
-function searchEnter(){
+const panelSet = {
+    upcoming: async (stopId) => {
+        const response = await fetch(`/map/upcoming/${stopId}`);
+        const html = await response.text();
+        console.log(html);
+        document.getElementById('bus-results').innerHTML = html
+    }
+}
+
+async function searchEnter(){
     const searchBarText = document.getElementById('searchBar-text').value;
-    goTo.stop(searchBarText)
+    const stopData = await goTo.stop(searchBarText);
+    panelSet.upcoming(stopData.id)
 }

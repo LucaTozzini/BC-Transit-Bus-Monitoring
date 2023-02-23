@@ -1,26 +1,20 @@
 import express from 'express';
-import gtfTrip from '../helpers/gtf-trip.helpers.js'
 
 import getMapBounds from '../middleware/get-mapBounds.middleware.js'
 import getStops from '../middleware/get-stops.middleware.js';
 import getStop from '../middleware/get-stop.middleware.js';
 import upcomingBuses from '../middleware/upcoming-buses.middleware.js';
 import getPositions from '../middleware/get-positions.middleware.js';
+import getTrips from '../middleware/get-trips.middleware.js';
 
 const router = express.Router()
 
-router.get('/trip-updates', async (req, res) => {
-    try{
-        const data = await gtfTrip();
-        if(data == 500){
-            throw new Error();
-        }
-        res.json(data);
+router.get('/trip-updates', 
+    getTrips,
+    (req, res) => {
+        res.status(200).json(res.locals.trips);
     }
-    catch{
-        res.status(200).send('Oops... There seems to be a problem with the data at the moment :(')
-    }
-});
+);
 
 router.get('/positions', 
     getPositions,
