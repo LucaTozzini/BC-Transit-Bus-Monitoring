@@ -1,23 +1,28 @@
-import express from 'express'
-import ejs from 'ejs'
+import ejs from 'ejs';
+import express from 'express';
 
-import nextRouter from './routes/next.routes.js'
-import dataRouter from './routes/data.routes.js'
-import defaultRouter from './routes/default.routes.js'
-import mapRouter from './routes/map.routes.js'
+import updateGtfrt from './helpers/update-gtfrt.helpers.js';
 
-const app = express()
-const PORT = 80
+import mapRouter from './routes/map.routes.js';
+import nextRouter from './routes/next.routes.js';
+import dataRouter from './routes/data.routes.js';
+import defaultRouter from './routes/default.routes.js';
+
+const app = express();
+const PORT = 80;
 
 app.set('view engine', 'ejs');
-app.use(express.json())
-app.use(express.static('public'))
+app.use(express.json());
+app.use(express.static('public'));
 
-app.use('/', defaultRouter)
-app.use('/next', nextRouter)
-app.use('/data', dataRouter)
-app.use('/map', mapRouter)
+app.use('/', defaultRouter);
+app.use('/next', nextRouter);
+app.use('/data', dataRouter);
+app.use('/map', mapRouter);
 
 app.listen(PORT, (err) => {
-    err ? console.error(err.message) : console.log('Server Listening On Port', PORT)
+    err ? console.error(err.message) : console.log('Server Listening On Port', PORT);
 })
+
+// Start Gtfrt Updater
+updateGtfrt(15)

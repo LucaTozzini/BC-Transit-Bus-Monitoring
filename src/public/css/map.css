@@ -25,14 +25,16 @@ body{
     width: 30rem;
     box-sizing: border-box;
     padding: 2rem;
+    padding-bottom: 0;
     display: flex;
+    gap: 1rem;
     flex-direction: column;
     align-items: center;
 }
 
 #searchBar{
     display: flex;
-    gap: .2rem;
+    gap: .5rem;
     height: 3rem;
     width: 100%;
 }
@@ -52,4 +54,19 @@ body{
     border-radius: .2rem;
     background-color: rgb(57, 57, 255);
     cursor: pointer;
+}
+
+#bus-results{
+    flex: 1;
+    width: 100%;
+    background-color: aqua;
+    display: flex;
+    flex-direction: column;
+    gap: .3rem;
+}
+
+.bus-result{
+    width: 100%;
+    height: 5rem;
+    background-color: blueviolet;
 }

@@ -11,13 +11,16 @@ const filePath = process.env.GTF_POSITION_FILE;
 function gtfPosition(){
     return new Promise(async resolve => {
         try{
-            // await downloadFile(fileUrl, filePath);
+            const get = await downloadFile(fileUrl, filePath);
+            if(get == 500){
+                throw new Error('HTTP Get Fail')
+            }
             const buffer = fs.readFileSync(filePath);
             const feed = gtfs.transit_realtime.FeedMessage.decode(new Uint8Array(buffer));
             resolve(feed)
         }
         catch(err){
-            console.error('gtfsPositione', err.message);
+            console.error('gtfPosition', err.message);
             resolve(500);
         }
     })

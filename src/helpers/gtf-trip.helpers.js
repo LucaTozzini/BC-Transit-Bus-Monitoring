@@ -11,13 +11,16 @@ const filePath = process.env.GTF_UPDATE_FILE;
 function gtfTrip(){
     return new Promise(async resolve => {
         try{
-            await downloadFile(fileUrl, filePath);
+            const get = await downloadFile(fileUrl, filePath);
+            if(get == 500){
+                throw new Error('HTTP Get Fail')
+            }
             const buffer = fs.readFileSync(filePath);
             const feed = gtfs.transit_realtime.FeedMessage.decode(new Uint8Array(buffer));
             resolve(feed)
         }
         catch(err){
-            console.error('gtfsTrip', err);
+            console.error('gtfTrip', err.message);
             resolve(500);
         }
     })

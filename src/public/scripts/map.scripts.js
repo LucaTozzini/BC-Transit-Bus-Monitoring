@@ -9,7 +9,7 @@ const map = L.map('map', {
     minZoom: 13
 }).setView(
     victoriaCoordinates, 
-    14,
+    16,
 );
 
 L.tileLayer(themes[0], {
@@ -55,4 +55,9 @@ const goTo = {
         const position = [json.lat, json.lng];
         map.flyTo(position, 19);
     }
+}
+
+function searchEnter(){
+    const searchBarText = document.getElementById('searchBar-text').value;
+    goTo.stop(searchBarText)
 }
