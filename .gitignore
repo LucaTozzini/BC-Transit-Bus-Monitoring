@@ -1,5 +1,5 @@
 /data/gtfrealtime_TripUpdates.bin
-/data/gtfrealtime_Positions.bin
+/data/gtfrealtime_VehiclePositions.bin
 /data/database.db
 /node_modules
 .env
