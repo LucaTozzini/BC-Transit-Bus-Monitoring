@@ -2,7 +2,7 @@ import express from 'express';
 
 import getMapBounds from '../middleware/get-mapBounds.middleware.js'
 import getStops from '../middleware/get-stops.middleware.js';
-import getStop from '../middleware/get-stop.middleware.js';
+import getStopByCode from '../middleware/get-stop-byCode.middleware.js';
 import upcomingBuses from '../middleware/upcoming-buses.middleware.js';
 import getPositions from '../middleware/get-positions.middleware.js';
 import getTrips from '../middleware/get-trips.middleware.js';
@@ -30,8 +30,8 @@ router.get('/stops',
     }
 );
 
-router.get('/stop',
-    getStop,
+router.get('/stop/:stopCode',
+    getStopByCode,
     (req, res) => {
         res.json(res.locals.stop);
     }

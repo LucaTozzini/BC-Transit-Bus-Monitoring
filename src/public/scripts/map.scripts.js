@@ -1,18 +1,16 @@
 const themes = [
     'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
     'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
 ];
 
 const victoriaCoordinates = [48.4284, -123.3656]
 
 const map = L.map('map', {
     minZoom: 13
-}).setView(
-    victoriaCoordinates, 
-    16,
-);
+})
 
-L.tileLayer(themes[0], {
+L.tileLayer(themes[2], {
     maxZoom: 19,
     attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
 }).addTo(map);
@@ -20,9 +18,14 @@ L.tileLayer(themes[0], {
 
 const busStops = L.layerGroup().addTo(map)
 
-map.on('dragend zoomend', function() {
+map.on('dragend zoomend load', function() {
     updateMap()
 });
+
+map.setView(
+    victoriaCoordinates, 
+    16,
+);
 
 async function updateMap(){
     const stops = await fetch('/data/points', {
@@ -38,19 +41,17 @@ async function updateMap(){
     const stopsJson = await stops.json();
     busStops.clearLayers();
     for(const stop of stopsJson){
-        L.marker([
-            stop.lat, 
-            stop.lng
-        ], {
-            id: stop.id,
-            code: stop.code
-        }).addTo(busStops);
+        const marker = L.marker([stop.lat, stop.lng], {id: stop.id, code: stop.code}).addTo(busStops);
+        marker.on('click', function() {
+            goTo.stop(stop.code);
+            panelSet.upcoming(stop.id);
+        });
     }
 }
 
 const goTo = {
     stop: async (code) => {
-        const data = await fetch(`/data/stop?stopCode=${code}`);
+        const data = await fetch(`/data/stop/${code}`);
         const json = await data.json();
         const position = [json.lat, json.lng];
         map.flyTo(position, 19);
@@ -72,3 +73,5 @@ async function searchEnter(){
     const stopData = await goTo.stop(searchBarText);
     panelSet.upcoming(stopData.id)
 }
+
+async function stopClick(){}

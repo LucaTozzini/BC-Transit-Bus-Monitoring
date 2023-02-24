@@ -17,6 +17,11 @@ router.get('/upcoming/:stopId',
                 <div class="bus-result">${new Date(bus.arrival_time * 1000)}</div>
             `
         }
+
+        if(html == ''){
+            html = '<div class="bus-result">No Upcoming Buses</div>'
+        }
+        
         res.status(200).send(html)
     }
 );

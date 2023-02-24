@@ -3,7 +3,7 @@ const db = openDatabase();
 
 function upcomingBuses(req, res, next){
     const stopId = parseInt(req.params.stopId);
-    db.all(`SELECT * FROM gtf_trips WHERE stop_id = ${stopId}`, (err, rows) => {
+    db.all(`SELECT * FROM gtf_trips WHERE stop_id = ${stopId} ORDER BY arrival_time ASC`, (err, rows) => {
         if(err){
             console.error(err.message);
             res.sendStatus(500);
