@@ -1,0 +1,3 @@
+service_id,date,exception_type
+499,20230407,2
+503,20230407,1

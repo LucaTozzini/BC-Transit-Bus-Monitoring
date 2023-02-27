@@ -42,5 +42,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
 
     <!-- Main Script -->
-    <script src="/scripts/map.scripts.js"></script>
+    <% if(type == 'stops') { %>
+        <script src="/scripts/map-stops.scripts.js"></script>
+    <% } else { %>
+        <script src="/scripts/map-buses.scripts.js"></script>
+    <% } %>
 </html>

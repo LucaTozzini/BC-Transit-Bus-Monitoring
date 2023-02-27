@@ -25,4 +25,4 @@ app.listen(PORT, (err) => {
 })
 
 // Start Gtfrt Updater
-updateGtfrt(30)
+updateGtfrt(60)

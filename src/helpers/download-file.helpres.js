@@ -1,33 +1,31 @@
-// Thanks ChatGPT
-import fs from 'fs';
 import http from 'http';
 
-function downloadFile(fileUrl, filePath) {
-  return new Promise((resolve) => {
-    const file = fs.createWriteStream(filePath);
+function downloadFile(fileUrl) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      headers: {
+        'Accept': 'application/octet-stream',
+      }
+    };
 
-    file.on('open', () => {
-      http.get(fileUrl, (response) => {
-        file.on('error', (error) => {
-          console.error(error);
-          resolve(500);
-        });
+    http.get(fileUrl, options, (response) => {
+      if (response.statusCode !== 200) {
+        console.error(`Failed to download file: ${response.statusCode} ${response.statusMessage}`);
+        reject(500);
+      }
 
-        // Truncate the file to remove existing content
-        fs.truncate(filePath, 0, (err) => {
-          if(err){
-            console.error(err);
-            resolve(500);
-          }
-          // Write the new content to the file
-          response.pipe(file);
-          file.on('finish', () => {
-            resolve(201);
-          });
-        });
-      }).on('error', (err) => {
-        resolve(500)
+      const chunks = [];
+      response.on('data', (chunk) => {
+        chunks.push(chunk);
       });
+
+      response.on('end', () => {
+        const buffer = Buffer.concat(chunks);
+        resolve(buffer);
+      });
+    }).on('error', (err) => {
+      console.error(err.message);
+      reject(500);
     });
   });
 }

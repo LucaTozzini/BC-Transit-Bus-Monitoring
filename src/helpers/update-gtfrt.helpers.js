@@ -38,6 +38,7 @@ function setUpTrips(){
             `CREATE TABLE IF NOT EXISTS gtf_trips(
                 id,
                 trip_id INT,
+                route_id INT,
                 stop_sequence INT,
                 arrival_time INT,
                 stop_id INT
@@ -56,7 +57,9 @@ function setUpTrips(){
 }
 
 async function save(){
+    return new Promise(async resolve => {
         try{
+            console.log('Save started')
             // Fetch Data From BC Transit
             const positions = await gtfPosition();
             const trips = await gtfTrip();
@@ -71,80 +74,103 @@ async function save(){
                 throw new Error();
             }
 
-            // Reset Positions Table
-            db.run('DELETE FROM gtf_positions', (err) =>{
-                if(err){
-                    console.error(err.message);
-                    return resolve(500);
-                }
-                // Loop Through Position Data
-                for(const bus of positions.entity){
-                    if(!bus.vehicle.hasOwnProperty('currentStopSequence') || !bus.vehicle.hasOwnProperty('currentStatus') || !bus.vehicle.hasOwnProperty('stopId')){
-                        continue    
+            await new Promise(resolve => {
+                // Reset Positions Table
+                db.run('DELETE FROM gtf_positions', async (err) =>{
+                    if(err){
+                        console.error(err.message);
                     }
-    
-                    // Filter Data
-                    const busData = {
-                        $id: bus.id, 
-                        $trip_id: bus.vehicle.trip.tripId,
-                        $lat: bus.vehicle.position.latitude, 
-                        $lng: bus.vehicle.position.longitude, 
-                        $time: bus.vehicle.timestamp, 
-                        $vehicle_id: bus.vehicle.vehicle.id,
-                        $stop_id: bus.vehicle.stopId,
-                        $stop_sequence: bus.vehicle.currentStopSequence,
-                        $status: bus.vehicle.currentStatus
-                    };
-    
-                    // Insert Data Into Database
-                    db.run(`INSERT INTO gtf_positions(id, trip_id, lat, lng, time, vehicle_id, stop_id, stop_sequence, status) VALUES ($id, $trip_id, $lat, $lng, $time, $vehicle_id, $stop_id, $stop_sequence, $status)`, busData, (err) => {
-                        if(err){
-                            console.error(err.message);
-                        }
-                    })
-                }
-            });
 
-            // Reset Trips Table
-            db.run('DELETE FROM gtf_trips', (err) => {
-                if(err){
-                    console.error(err.message);
-                }
-                
-                // Loop Through Trip Data
-                for(const trip of trips.entity){
-
-                    // Loop Through StopTimeUpdate
-                    for(const stop of trip.tripUpdate.stopTimeUpdate){
-                        try{
-                            // Filter Data
-                            const tripData = {
-                                $id: parseInt(trip.id),
-                                $trip_id: parseInt(trip.tripUpdate.trip.tripId),
-                                $stop_sequence: parseInt(stop.stopSequence),
-                                $arrival_time: parseInt(stop.arrival.time.low),
-                                $stop_id: parseInt(stop.stopId)
+                    let i = 0;
+                    // Loop Through Position Data
+                    for(const bus of positions.entity){
+                        i++;
+                        console.log(i, '/', positions.entity.length)
+                        await new Promise(resolve => {
+                            if(!bus.vehicle.hasOwnProperty('currentStopSequence') || !bus.vehicle.hasOwnProperty('currentStatus') || !bus.vehicle.hasOwnProperty('stopId')){
+                                resolve();    
                             }
-                            db.run(`INSERT INTO gtf_trips(id, trip_id, stop_sequence, arrival_time, stop_id) VALUES ($id, $trip_id, $stop_sequence, $arrival_time, $stop_id)`, tripData, (err) => {
+            
+                            // Filter Data
+                            const busData = {
+                                $id: bus.id, 
+                                $trip_id: bus.vehicle.trip.tripId,
+                                $lat: bus.vehicle.position.latitude, 
+                                $lng: bus.vehicle.position.longitude, 
+                                $time: bus.vehicle.timestamp, 
+                                $vehicle_id: bus.vehicle.vehicle.id,
+                                $stop_id: bus.vehicle.stopId,
+                                $stop_sequence: bus.vehicle.currentStopSequence,
+                                $status: bus.vehicle.currentStatus
+                            };
+            
+                            // Insert Data Into Database
+                            db.run(`INSERT INTO gtf_positions(id, trip_id, lat, lng, time, vehicle_id, stop_id, stop_sequence, status) VALUES ($id, $trip_id, $lat, $lng, $time, $vehicle_id, $stop_id, $stop_sequence, $status)`, busData, (err) => {
                                 if(err){
                                     console.error(err.message);
                                 }
+                                resolve();
+                            })
+                        })
+                    }
+                    resolve()
+                });
+            })
+
+            await new Promise(resolve => {
+                // Reset Trips Table
+                db.run('DELETE FROM gtf_trips', async (err) => {
+                    if(err){
+                        console.error(err.message);
+                    }
+                    
+                    let i = 0;
+                    // Loop Through Trip Data
+                    for(const trip of trips.entity){
+                        i++;
+                        console.log(i, '/', trips.entity.length);
+
+                        // Loop Through StopTimeUpdate
+                        for(const stop of trip.tripUpdate.stopTimeUpdate){
+                            await new Promise(resolve => {
+                                try{
+                                    // Filter Data
+                                    const tripData = {
+                                        $id: parseInt(trip.id),
+                                        $trip_id: parseInt(trip.tripUpdate.trip.tripId),
+                                        $stop_sequence: parseInt(stop.stopSequence),
+                                        $arrival_time: parseInt(stop.arrival.time.low),
+                                        $stop_id: parseInt(stop.stopId)
+                                    }
+                                    db.run(`INSERT INTO gtf_trips(id, trip_id, stop_sequence, arrival_time, stop_id) VALUES ($id, $trip_id, $stop_sequence, $arrival_time, $stop_id)`, tripData, (err) => {
+                                        if(err){
+                                            console.error(err.message);
+                                        }
+                                        resolve();
+                                    })
+                                }
+                                catch{
+                                    resolve();
+                                }
                             })
                         }
-                        catch{
-                            continue
-                        }
                     }
-                }
-            });
+                    resolve()
+                });
+            })
+
+            console.log('Save finished');
+            resolve();
         }
         catch(err){
             console.error(err.message);
+            resolve(500)
         }
+    })
 }
 
 async function updateGtfrt(seconds){
-    save();
+    await save();
     setTimeout(() => {
         updateGtfrt(seconds);
     }, seconds * 1000);

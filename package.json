@@ -1,6 +1,7 @@
 {
   "type": "module",
   "dependencies": {
+    "adm-zip": "^0.5.10",
     "csvtojson": "^2.0.10",
     "dotenv": "^16.0.3",
     "ejs": "^3.1.8",
