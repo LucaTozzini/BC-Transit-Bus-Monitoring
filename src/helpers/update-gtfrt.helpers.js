@@ -17,6 +17,7 @@ function setUpPositions(){
                 trip_id INT,
                 lat REAL,
                 lng REAL,
+                bearing INT,
                 time INT,
                 vehicle_id INT,
                 stop_id INT, 
@@ -65,6 +66,8 @@ async function save(){
             const trips = await gtfTrip();
             
             // Set Up Table
+            await dropTable(db, 'gtf_positions_tmp');
+            await dropTable(db, 'gtf_trips_tmp');
             if(await setUpPositions() == 500 || await setUpTrips() == 500){
                 throw new Error('Error Creating Tables');
             }
@@ -78,6 +81,7 @@ async function save(){
                 bus.vehicle.trip ? parseInt(bus.vehicle.trip.tripId) : null,
                 parseFloat(bus.vehicle.position.latitude),
                 parseFloat(bus.vehicle.position.longitude),
+                parseInt(bus.vehicle.position.bearing),
                 parseInt(bus.vehicle.timestamp.low),
                 parseInt(bus.vehicle.vehicle.id),
                 bus.vehicle.stopId > 0 ? parseInt(bus.vehicle.stopId) : null,
@@ -86,7 +90,7 @@ async function save(){
             ]);
 
             // Prepare Position Insertion
-            const posPrep = db.prepare(`INSERT INTO gtf_positions_tmp(id, trip_id, lat, lng, time, vehicle_id, stop_id, stop_sequence, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+            const posPrep = db.prepare(`INSERT INTO gtf_positions_tmp(id, trip_id, lat, lng, bearing, time, vehicle_id, stop_id, stop_sequence, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`);
 
             // Loop Through Position Data
             for(const position of positionData){
