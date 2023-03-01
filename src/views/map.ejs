@@ -18,8 +18,8 @@
             <div id="map"></div> 
             <div id="sidePanel">
                 <div id="mapType-selectors">
-                    <a class="mapType-selector">Stops</a>
-                    <a class="mapType-selector">Buses</a>
+                    <a class="mapType-selector" href="/map/stops">Stops</a>
+                    <a class="mapType-selector" href="/map/buses">Buses</a>
                 </div>
                 <div id="searchBar">
                     <input type='text' id="searchBar-text" placeholder="Search Bus Stop...">
@@ -44,7 +44,7 @@
     <!-- Main Script -->
     <% if(type == 'stops') { %>
         <script src="/scripts/map-stops.scripts.js"></script>
-    <% } else { %>
-        <script src="/scripts/map-buses.scripts.js"></script>
+    <% } else if(type == 'buses') { %>
+        <script src="/scripts/map-busPositions.scripts.js"></script>
     <% } %>
 </html>

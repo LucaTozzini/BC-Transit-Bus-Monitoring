@@ -1,5 +1,9 @@
 import openDatabase from "./open-database.helpers.js";
-
+import beginTransaction from "./sql/beginTransaction.helpers.js";
+import commitToDatabase from "./sql/commit-to-database.helpers.js";
+import renameTable from "./sql/renameTable.helpers.js";
+import dropTable from "./sql/dropTable.helpers.js";
+import insertRow from "./sql/insertRow.helpers.js";
 import gtfPosition from './gtf-position.helpers.js';
 import gtfTrip from "./gtf-trip.helpers.js";
 
@@ -8,7 +12,7 @@ const db = openDatabase();
 function setUpPositions(){
     return new Promise(resolve => {
         db.run(
-            `CREATE TABLE IF NOT EXISTS gtf_positions(
+            `CREATE TABLE IF NOT EXISTS gtf_positions_tmp(
                 id INTEGER PRIMARY KEY,
                 trip_id INT,
                 lat REAL,
@@ -35,7 +39,7 @@ function setUpPositions(){
 function setUpTrips(){
     return new Promise(resolve => {
         db.run(
-            `CREATE TABLE IF NOT EXISTS gtf_trips(
+            `CREATE TABLE IF NOT EXISTS gtf_trips_tmp(
                 id,
                 trip_id INT,
                 route_id INT,
@@ -46,127 +50,92 @@ function setUpTrips(){
             (err) => {
                 if(err){
                     console.error(err.message);
-                    resolve(500);
                 }
-                else{
-                    resolve(200)
-                }
+                resolve(200);
             }
         )
     })
 }
 
 async function save(){
-    return new Promise(async resolve => {
-        try{
-            console.log('Save started')
+        try{            
             // Fetch Data From BC Transit
             const positions = await gtfPosition();
             const trips = await gtfTrip();
             
             // Set Up Table
-            const posTable = await setUpPositions();
-            const triTable = await setUpTrips();
+            await setUpPositions();
+            await setUpTrips();
 
-            // If Table Set Up Fails
-            // Throw Error
-            if(posTable == 500 || triTable == 500){
-                throw new Error();
+            // Begin Trasaction
+            await beginTransaction(db);
+
+            // Filter Position Data
+            const positionData = positions.entity.map((bus) => [
+                parseInt(bus.id),
+                bus.vehicle.trip ? parseInt(bus.vehicle.trip.tripId) : null,
+                parseFloat(bus.vehicle.position.latitude),
+                parseFloat(bus.vehicle.position.longitude),
+                parseInt(bus.vehicle.timestamp.low),
+                parseInt(bus.vehicle.vehicle.id),
+                bus.vehicle.stopId > 0 ? parseInt(bus.vehicle.stopId) : null,
+                parseInt(bus.vehicle.currentStopSequence),
+                parseInt(bus.vehicle.currentStatus),
+            ]);
+
+            // Prepare Position Insertion
+            const posPrep = db.prepare(`INSERT INTO gtf_positions_tmp(id, trip_id, lat, lng, time, vehicle_id, stop_id, stop_sequence, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
+
+            // Loop Through Position Data
+            for(const position of positionData){
+                // Insert Positions Into Table
+                await insertRow(posPrep, position);
+            }
+            
+            // Filter Trips Data
+            let tripsData = []
+            for(const trip of trips.entity){
+                for(const stop of trip.tripUpdate.stopTimeUpdate){
+                    tripsData.push([
+                        parseInt(trip.id),
+                        parseInt(trip.tripUpdate.trip.tripId),
+                        parseInt(stop.stopSequence),
+                        stop.arrival ? parseInt(stop.arrival.time.low) : null,
+                        parseInt(stop.stopId)
+                    ])
+                }
             }
 
-            await new Promise(resolve => {
-                // Reset Positions Table
-                db.run('DELETE FROM gtf_positions', async (err) =>{
-                    if(err){
-                        console.error(err.message);
-                    }
+            // Prepare Trips Insertion
+            const tripsPrep = db.prepare(`INSERT INTO gtf_trips_tmp(id, trip_id, stop_sequence, arrival_time, stop_id) VALUES (?, ?, ?, ?, ?)`);
 
-                    let i = 0;
-                    // Loop Through Position Data
-                    for(const bus of positions.entity){
-                        i++;
-                        console.log(i, '/', positions.entity.length)
-                        await new Promise(resolve => {
-                            if(!bus.vehicle.hasOwnProperty('currentStopSequence') || !bus.vehicle.hasOwnProperty('currentStatus') || !bus.vehicle.hasOwnProperty('stopId')){
-                                resolve();    
-                            }
+            // Loop Through Trips Data
+            for(const trip of tripsData){
+                await insertRow(tripsPrep, trip);
+            }
             
-                            // Filter Data
-                            const busData = {
-                                $id: bus.id, 
-                                $trip_id: bus.vehicle.trip.tripId,
-                                $lat: bus.vehicle.position.latitude, 
-                                $lng: bus.vehicle.position.longitude, 
-                                $time: bus.vehicle.timestamp, 
-                                $vehicle_id: bus.vehicle.vehicle.id,
-                                $stop_id: bus.vehicle.stopId,
-                                $stop_sequence: bus.vehicle.currentStopSequence,
-                                $status: bus.vehicle.currentStatus
-                            };
+            // Commit Database
+            await commitToDatabase(db);
+
+            // Switch Tables
+            await renameTable(db, 'gtf_positions', 'gtf_positions_backup');
+            await renameTable(db, 'gtf_positions_tmp', 'gtf_positions');
+            await dropTable(db, 'gtf_positions_backup');
             
-                            // Insert Data Into Database
-                            db.run(`INSERT INTO gtf_positions(id, trip_id, lat, lng, time, vehicle_id, stop_id, stop_sequence, status) VALUES ($id, $trip_id, $lat, $lng, $time, $vehicle_id, $stop_id, $stop_sequence, $status)`, busData, (err) => {
-                                if(err){
-                                    console.error(err.message);
-                                }
-                                resolve();
-                            })
-                        })
-                    }
-                    resolve()
-                });
-            })
+            await renameTable(db, 'gtf_trips', 'gtf_trips_backup');
+            await renameTable(db, 'gtf_trips_tmp', 'gtf_trips');
+            await dropTable(db, 'gtf_trips_backup');
 
-            await new Promise(resolve => {
-                // Reset Trips Table
-                db.run('DELETE FROM gtf_trips', async (err) => {
-                    if(err){
-                        console.error(err.message);
-                    }
-                    
-                    let i = 0;
-                    // Loop Through Trip Data
-                    for(const trip of trips.entity){
-                        i++;
-                        console.log(i, '/', trips.entity.length);
-
-                        // Loop Through StopTimeUpdate
-                        for(const stop of trip.tripUpdate.stopTimeUpdate){
-                            await new Promise(resolve => {
-                                try{
-                                    // Filter Data
-                                    const tripData = {
-                                        $id: parseInt(trip.id),
-                                        $trip_id: parseInt(trip.tripUpdate.trip.tripId),
-                                        $stop_sequence: parseInt(stop.stopSequence),
-                                        $arrival_time: parseInt(stop.arrival.time.low),
-                                        $stop_id: parseInt(stop.stopId)
-                                    }
-                                    db.run(`INSERT INTO gtf_trips(id, trip_id, stop_sequence, arrival_time, stop_id) VALUES ($id, $trip_id, $stop_sequence, $arrival_time, $stop_id)`, tripData, (err) => {
-                                        if(err){
-                                            console.error(err.message);
-                                        }
-                                        resolve();
-                                    })
-                                }
-                                catch{
-                                    resolve();
-                                }
-                            })
-                        }
-                    }
-                    resolve()
-                });
-            })
-
-            console.log('Save finished');
-            resolve();
+            // Return Created Status
+            return {status: 201};
         }
+
+        // If An Error Occurs
+        // Return Internal Server Error Status
         catch(err){
             console.error(err.message);
-            resolve(500)
+            return {status: 500};
         }
-    })
 }
 
 async function updateGtfrt(seconds){

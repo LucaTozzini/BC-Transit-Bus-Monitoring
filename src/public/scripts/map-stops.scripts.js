@@ -7,7 +7,7 @@ const themes = [
 const victoriaCoordinates = [48.4284, -123.3656]
 
 const map = L.map('map', {
-    minZoom: 13
+    // minZoom: 13
 })
 
 L.tileLayer(themes[2], {
@@ -28,7 +28,7 @@ map.setView(
 );
 
 async function updateMap(){
-    const stops = await fetch('/data/points', {
+    const stops = await fetch('/map/points/stops', {
         method: 'POST', // *GET, POST, PUT, DELETE, etc.
         headers: {
           'Content-Type': 'application/json'
@@ -50,8 +50,8 @@ async function updateMap(){
 }
 
 const goTo = {
-    stop: async (code) => {
-        const data = await fetch(`/data/stop/${code}`);
+    stop: async (stopCode) => {
+        const data = await fetch(`/data/stop/${stopCode}`);
         const json = await data.json();
         const position = [json.lat, json.lng];
         map.flyTo(position, 19);
@@ -61,7 +61,7 @@ const goTo = {
 
 const panelSet = {
     upcoming: async (stopId) => {
-        const response = await fetch(`/map/upcoming/${stopId}`);
+        const response = await fetch(`/map/upcoming/buses/${stopId}`);
         const html = await response.text();
         console.log(html);
         document.getElementById('bus-results').innerHTML = html
@@ -73,5 +73,3 @@ async function searchEnter(){
     const stopData = await goTo.stop(searchBarText);
     panelSet.upcoming(stopData.id)
 }
-
-async function stopClick(){}

@@ -1,0 +1,171 @@
+:root{
+    --margin-width: clamp(1rem, 4vw, 3rem);
+}
+
+*{
+    padding: 0;
+    margin: 0;
+    border: none;
+    text-decoration: none;
+    outline: none;
+    user-select: none;
+    font-family: sans-serif;
+}
+
+body{
+    /* background: linear-gradient( 174.2deg,  rgba(255,244,228,1) 7.1%, rgba(240,246,238,1) 67.4% ); */
+    /* height: 100vh; */
+    width: 100%;
+    overflow-y: scroll;
+    overflow-x: hidden;
+}
+
+a{
+    cursor: pointer;
+}
+
+#menu{
+    width: 100%;
+    height: 5rem;
+
+    padding: 0 var(--margin-width);
+    box-sizing: border-box;
+    margin-bottom: 2rem;
+    
+    position: sticky;
+    left: 0;
+    top: 0;
+
+    background-color: white;
+    border-bottom: .1rem solid rgb(214, 214, 214);
+
+    display: flex;
+    align-items: center;
+    gap: clamp(1rem, 3vw, 1.5rem);
+
+    z-index: 100;
+}
+
+#logo{
+    display: flex;
+    align-items: center;
+    gap: .2rem;
+    height: 100%;
+    margin-right: 4vw;
+}
+
+#logo-img{
+    background-image: url(https://www.pngmart.com/files/4/Pepsi-Logo-Transparent-PNG.png);
+    height: 50%;
+    width: clamp(2rem, 4vw, 4rem);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#logo-text{
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: bolder;
+}
+
+.menu-item{
+    color: rgb(197, 197, 197);
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    font-weight: bolder;
+    text-transform: uppercase;
+    
+    display: flex;
+    align-items: center;
+    
+    transition: color 500ms ease, background-color 350ms ease-in;
+}
+
+.menu-item:hover{
+    color: black;
+}
+
+#content-container{
+    display: flex;
+    gap: .5rem;
+    margin-bottom: 1rem;
+    flex-direction: column;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 var(--margin-width);
+}
+
+.content-row{
+    width: 100%;
+    box-sizing: border-box;
+    gap: .5rem;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.content-item{
+    height: 30rem;
+    flex: 1;
+    background-color: white;
+    border-radius: 1rem;
+
+    box-shadow: 0 0 1rem rgba(0, 0, 0, 0.055);
+    border: .1rem solid rgb(234, 234, 234);
+
+    overflow: hidden;
+    
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: cover;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition: all 500ms;
+}
+
+.content-item-text{
+    padding: 3vw;
+    font-size: clamp(2.5rem, 3.3vw, 4rem);
+    font-weight: bolder;
+}
+
+.static-overlay{
+    height: 100%;
+    width: 100%;
+    background-color: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(.3rem);
+    display: inherit;
+    align-items: inherit;
+    justify-content: inherit;
+}
+
+a.content-item:hover{
+    scale: 1.05;
+}
+
+.content-item-small{
+    flex: .5;
+}
+
+.inverter:hover{
+    background-color: rgb(48, 48, 48);
+    color: white;
+}
+
+@media (width < 55rem) {
+    .content-item{
+        flex: 100% !important;
+        height: 20rem;
+    }
+
+    .fold{
+        display: none;
+    }
+
+    .content-item-text{
+        font-size: clamp(3rem, 6vw, 3.8rem);
+        padding: 4vw;
+    }
+}

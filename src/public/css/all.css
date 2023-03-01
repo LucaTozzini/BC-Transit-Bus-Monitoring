@@ -1,0 +1,13 @@
+footer {
+    margin-top: 12rem;
+    width: 100vw;
+    padding: 5rem 0 ;
+    background-color: black;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+footer p{
+    color: white;
+}

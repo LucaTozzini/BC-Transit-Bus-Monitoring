@@ -1,54 +1,82 @@
 import csvtojson from 'csvtojson';
 import openDatabase from '../open-database.helpers.js';
 
-function routesCsvToSql(routesTxt){
+import beginTransaction from '../sql/beginTransaction.helpers.js';
+import commitToDatabase from '../sql/commit-to-database.helpers.js';
+import dropTable from '../sql/dropTable.helpers.js';
+import renameTable from '../sql/renameTable.helpers.js';
+import insertRow from '../sql/insertRow.helpers.js';
+
+const db = openDatabase();
+
+function createRoutesTable(){
     return new Promise(resolve => {
-        console.log('routesCsvToSql Start')
-        const db = openDatabase();
-        
-        db.run(`CREATE TABLE routes(
-            id INTEGER PRIMARY KEY,
-            short_name INT,
-            name TEXT
-        )`, (err) => {
+        db.run(`DROP TABLE IF EXISTS routes_tmp`, (err) => {
             if(err){
-                console.error(err.message);
+                console.error(err.message)
             }
-            db.run(`DELETE FROM routes`, (err) => {
+            db.run(`CREATE TABLE routes_tmp (id INTEGER PRIMARY KEY, short_name INT, name TEXT, color)`, (err) => {
                 if(err){
                     console.error(err.message);
                 }
-                
-                csvtojson().fromFile(routesTxt).then(async json => {
-                    json = json.map(({
-                        route_id, 
-                        route_short_name,
-                        route_long_name
-                    }) => ({
-                        id: parseInt(route_id), 
-                        short_name: parseInt(route_short_name),
-                        name: route_long_name
-                    }));
-
-                    let i = 0;
-                    for(const route of json){
-                        i++;
-                        console.log(i, '/', json.length);
-                        await new Promise(resolve => {
-                            const {id, short_name, name} = route;
-                            db.run(`INSERT INTO routes (id, short_name, name) VALUES (?, ?, ?)`, [id, short_name, name], (err) => {
-                                if(err){
-                                    console.error(err.message);
-                                }
-                                resolve()
-                            })
-                        })
-                    }
-                    resolve();
-                })
+                resolve();
             })
-        })                                                                   
+        })
     })
+}
+
+function getJson(csv){
+    return new Promise(resolve => {
+        csvtojson().fromFile(csv).then(async json => {
+            json = json.map(
+                ({
+                    route_id, 
+                    route_short_name,
+                    route_long_name,
+                    route_color
+                }) => ([
+                    parseInt(route_id), 
+                    parseInt(route_short_name),
+                    route_long_name,
+                    route_color
+                ])
+            );
+
+            resolve(json)
+        })
+    })
+}
+
+async function routesCsvToSql(csv){
+    // Create Table
+    await createRoutesTable();
+
+    // Parse And Filter Csv
+    const json = await getJson(csv);
+    
+    // Prepare Table For Insertion
+    const prep = db.prepare(`INSERT INTO routes_tmp (id, short_name, name, color) VALUES (?, ?, ?, ?)`);
+    
+    // Begin SQL Transaction
+    await beginTransaction(db);
+
+    // Loop Through Data
+    for(const route of json){
+        // Insert Into Table
+        await insertRow(prep, route);
+    }
+
+    // Commit Database
+    await commitToDatabase(db);
+
+    // Rename Tables
+    await renameTable(db, 'routes', 'routes_backup');
+    await renameTable(db, 'routes_tmp', 'routes');
+
+    // Drop Uneeded Table
+    await dropTable(db, 'routes_backup');
+
+    return;                                                               
 }
 
 export default routesCsvToSql;

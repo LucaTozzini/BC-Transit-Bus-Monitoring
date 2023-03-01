@@ -8,8 +8,8 @@ function upcomingStops(req, res, next){
     db.all(
         `SELECT s.*
         FROM gtf_positions AS p
-        JOIN stop_times AS s ON s.trip_id = p.trip_id
-        WHERE p.trip_id = ${tripId} AND p.stop_sequence >= ${stopSeq}`,
+        JOIN stop_times AS s ON s.trip_id = p.trip_id AND s.stop_sequence >= p.stop_sequence 
+        WHERE p.trip_id = ${tripId}`,
         (err, rows) => {
             if(err){
                 console.error(err.message);

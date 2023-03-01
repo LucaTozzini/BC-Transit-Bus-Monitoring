@@ -1,23 +1,30 @@
 import express from 'express';
 import upcomingBuses from '../middleware/upcoming-buses.middleware.js';
 
+import getMapBounds from '../middleware/get-mapBounds.middleware.js'
+import getStops from '../middleware/get-stops.middleware.js';
+import getBusPositions from '../middleware/get-busPositions.middleware.js';
+
 const router = express.Router();
 
 router.get('/stops', async (req, res) => {
     res.render('map', {type:'stops'});
 });
 
+router.get('/buses', async (req, res) => {
+    res.render('map', {type:'buses'});
+});
+
 router.get('/buses', (req, res) => {
     res.render('map', {type: 'buses'})
 });
 
-router.get('/upcoming/:stopId',
+router.get('/upcoming/buses/:stopId',
     upcomingBuses,
     (req, res) => {
         const upcoming = res.locals.upcoming;
         let html = ''
         for(const bus of upcoming){
-            console.log(bus)
             const date = new Date(bus.arrival_time * 1000);
             let hour;
             let minute;
@@ -45,5 +52,21 @@ router.get('/upcoming/:stopId',
         res.status(200).send(html)
     }
 );
+
+router.post('/points/stops', 
+    getMapBounds,
+    getStops,
+    (req, res) => {
+        res.status(200).json(res.locals.stops)
+    }
+);
+
+router.post('/points/buses', 
+    getMapBounds,
+    getBusPositions,
+    (req, res) => {
+        res.status(200).json(res.locals.busPositions);
+    }
+)
 
 export default router;
