@@ -7,11 +7,22 @@ import upcomingStops from '../middleware/upcoming-stops.middleware.js';
 
 import getPositions from '../middleware/get-positions.middleware.js';
 import getTrips from '../middleware/get-trips.middleware.js';
+import getPositionByVehicleId from '../middleware/get-position-byVehicleId.middleware.js';
 
 import gtfTrips from '../helpers/gtf-trip.helpers.js';
 import gtfPosition from '../helpers/gtf-position.helpers.js';
 
 const router = express.Router()
+
+router.get('/raw/trip-updates', async (req, res) => {
+    const data = await gtfTrips();
+    res.json(data);
+});
+
+router.get('/raw/positions', async(req, res) => {
+    const data = await gtfPosition();
+    res.json(data);
+})
 
 router.get('/trip-updates', 
     getTrips,
@@ -27,15 +38,12 @@ router.get('/positions',
     }
 );
 
-router.get('/raw/trips', async (req, res) => {
-    const data = await gtfTrips();
-    res.json(data);
-});
-
-router.get('/raw/positions', async(req, res) => {
-    const data = await gtfPosition();
-    res.json(data);
-})
+router.get('/position/:vehicleId',
+    getPositionByVehicleId,
+    (req, res) => {
+        res.json(res.locals.position);
+    }
+)
 
 router.get('/stops',
     getStops,

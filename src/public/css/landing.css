@@ -14,7 +14,8 @@
 
 body{
     /* background: linear-gradient( 174.2deg,  rgba(255,244,228,1) 7.1%, rgba(240,246,238,1) 67.4% ); */
-    /* height: 100vh; */
+    /* background: linear-gradient(0deg, #FFDEE9 0%, #B5FFFC 100%); */
+    background-attachment: fixed;
     width: 100%;
     overflow-y: scroll;
     overflow-x: hidden;
@@ -143,6 +144,11 @@ a{
 
 a.content-item:hover{
     scale: 1.05;
+    box-shadow: 0 0 2rem rgba(0, 0, 0, 0.273);
+}
+
+#content-container:has(a.content-item:hover) .content-item:not(:hover){
+    opacity: 0.1;
 }
 
 .content-item-small{

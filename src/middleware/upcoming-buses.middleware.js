@@ -8,11 +8,11 @@ function upcomingBuses(req, res, next){
     const weekdays = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
 
     // get the current hour, minute and second
-    let hours = now.getHours();
+    let hours = now.getHours() < 3 ? now.getHours() + 24 : now.getHours();
     let minutes = now.getMinutes();
     let seconds = now.getSeconds();
 
-    const day = weekdays[now.getDay()];
+    const day = weekdays[now.getHours() < 3 ? now.getDay() - 1 : now.getDay()];
 
     // add leading zeros to the hours, minutes and seconds if necessary
     hours = hours.toString().padStart(2, '0');

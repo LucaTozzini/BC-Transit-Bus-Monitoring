@@ -50,6 +50,7 @@ function setUpTrips(){
             (err) => {
                 if(err){
                     console.error(err.message);
+                    resolve(500)
                 }
                 resolve(200);
             }
@@ -64,8 +65,9 @@ async function save(){
             const trips = await gtfTrip();
             
             // Set Up Table
-            await setUpPositions();
-            await setUpTrips();
+            if(await setUpPositions() == 500 || await setUpTrips() == 500){
+                throw new Error('Error Creating Tables');
+            }
 
             // Begin Trasaction
             await beginTransaction(db);

@@ -1,5 +1,6 @@
 import express from 'express';
 import upcomingBuses from '../middleware/upcoming-buses.middleware.js';
+import upcomingStops from '../middleware/upcoming-stops.middleware.js';
 
 import getMapBounds from '../middleware/get-mapBounds.middleware.js'
 import getStops from '../middleware/get-stops.middleware.js';
@@ -7,16 +8,9 @@ import getBusPositions from '../middleware/get-busPositions.middleware.js';
 
 const router = express.Router();
 
-router.get('/stops', async (req, res) => {
-    res.render('map', {type:'stops'});
-});
-
-router.get('/buses', async (req, res) => {
-    res.render('map', {type:'buses'});
-});
-
-router.get('/buses', (req, res) => {
-    res.render('map', {type: 'buses'})
+router.get('/', async (req, res) => {
+    const type = parseInt(req.query.type);
+    res.render('map', {type});
 });
 
 router.get('/upcoming/buses/:stopId',
@@ -40,7 +34,7 @@ router.get('/upcoming/buses/:stopId',
             html += `
                 <div class="bus-result">
                     <div>${hour}:${minute}</div>
-                    <div>${bus.short_name} - ${bus.name}</div>
+                    <div>${bus.headsign}</div>
                 </div>
             `
         }
@@ -52,6 +46,28 @@ router.get('/upcoming/buses/:stopId',
         res.status(200).send(html)
     }
 );
+
+router.get('/upcoming/stops/:vehicleId',
+    upcomingStops,
+    (req, res) => {
+        const upcoming = res.locals.upcomingStops;
+        let html = '';
+        for(const bus of upcoming){
+            html += `
+                <div class="bus-result">
+                    <div>${bus.scheduled_time}</div>
+                    <div>${bus.short_name} - ${bus.name}</div>
+                </div>
+            `
+        }
+
+        if(html == ''){
+            html = '<div class="bus-result">No Upcoming Stops</div>'
+        }
+
+        res.status(200).send(html)
+    }
+)
 
 router.post('/points/stops', 
     getMapBounds,

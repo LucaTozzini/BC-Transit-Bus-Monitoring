@@ -2,14 +2,16 @@ import openDatabase from "../helpers/open-database.helpers.js";
 const db = openDatabase();
 
 function upcomingStops(req, res, next){
-    const tripId = parseInt(req.params.tripId);
-    const stopSeq = parseInt(req.params.stopSeq);
+    const vehicleId = parseInt(req.params.vehicleId);
 
     db.all(
-        `SELECT s.*
+        `SELECT st.*, r.short_name, s.name
         FROM gtf_positions AS p
-        JOIN stop_times AS s ON s.trip_id = p.trip_id AND s.stop_sequence >= p.stop_sequence 
-        WHERE p.trip_id = ${tripId}`,
+        JOIN stop_times AS st ON st.trip_id = p.trip_id AND st.stop_sequence >= p.stop_sequence
+        JOIN stops AS s ON s.id = st.stop_id
+        JOIN trips AS t ON t.id = p.trip_id
+        JOIN routes AS r ON r.id = t.route_id  
+        WHERE p.vehicle_id = ${vehicleId}`,
         (err, rows) => {
             if(err){
                 console.error(err.message);
