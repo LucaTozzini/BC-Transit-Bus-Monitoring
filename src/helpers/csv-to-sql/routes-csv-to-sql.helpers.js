@@ -15,7 +15,7 @@ function createRoutesTable(){
             if(err){
                 console.error(err.message)
             }
-            db.run(`CREATE TABLE routes_tmp (id INTEGER PRIMARY KEY, short_name INT, name TEXT, color)`, (err) => {
+            db.run(`CREATE TABLE routes_tmp (id INTEGER PRIMARY KEY, provider TEXT, short_name INT, name TEXT, color)`, (err) => {
                 if(err){
                     console.error(err.message);
                 }
@@ -25,7 +25,7 @@ function createRoutesTable(){
     })
 }
 
-function getJson(csv){
+function getJson(csv, provider){
     return new Promise(resolve => {
         csvtojson().fromFile(csv).then(async json => {
             json = json.map(
@@ -36,6 +36,7 @@ function getJson(csv){
                     route_color
                 }) => ([
                     parseInt(route_id), 
+                    provider,
                     parseInt(route_short_name),
                     route_long_name,
                     route_color
@@ -47,15 +48,15 @@ function getJson(csv){
     })
 }
 
-async function routesCsvToSql(csv){
+async function routesCsvToSql(csv, provider){
     // Create Table
     await createRoutesTable();
 
     // Parse And Filter Csv
-    const json = await getJson(csv);
+    const json = await getJson(csv, provider);
     
     // Prepare Table For Insertion
-    const prep = db.prepare(`INSERT INTO routes_tmp (id, short_name, name, color) VALUES (?, ?, ?, ?)`);
+    const prep = db.prepare(`INSERT INTO routes_tmp (id, provider, short_name, name, color) VALUES (?, ?, ?, ?, ?)`);
     
     // Begin SQL Transaction
     await beginTransaction(db);

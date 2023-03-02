@@ -5,24 +5,30 @@ import getStopByCode from '../middleware/get-stop-byCode.middleware.js';
 import upcomingBuses from '../middleware/upcoming-buses.middleware.js';
 import upcomingStops from '../middleware/upcoming-stops.middleware.js';
 
-import getPositions from '../middleware/get-positions.middleware.js';
 import getTrips from '../middleware/get-trips.middleware.js';
+import getPositions from '../middleware/get-positions.middleware.js';
 import getPositionByVehicleId from '../middleware/get-position-byVehicleId.middleware.js';
 
-import gtfTrips from '../helpers/gtf-trip.helpers.js';
-import gtfPosition from '../helpers/gtf-position.helpers.js';
+import gtfsTrips from '../helpers/gtfs-trip.helpers.js';
+import gtfsAlerts from '../helpers/gtfs-alerts.helpers.js'
+import gtfsPosition from '../helpers/gtfs-position.helpers.js';
 
 const router = express.Router()
 
 router.get('/raw/trip-updates', async (req, res) => {
-    const data = await gtfTrips();
+    const data = await gtfsTrips();
     res.json(data);
 });
 
 router.get('/raw/positions', async(req, res) => {
-    const data = await gtfPosition();
+    const data = await gtfsPosition();
     res.json(data);
-})
+});
+
+router.get('/raw/alerts', async (req, res) => {
+    const data = await gtfsAlerts();
+    res.json(data);
+});
 
 router.get('/trip-updates', 
     getTrips,

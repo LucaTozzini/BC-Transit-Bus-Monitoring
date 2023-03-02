@@ -1,10 +1,11 @@
-let mapType
+let mapType, locationInitialized = false;
 
 // Themes For OpenStreetMap
 const themes = [
-    'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
-    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'
+    ['https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', ''],
+    ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', ''],
+    ['https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'],
+    ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', '']
 ];
 
 // Coordinates Of Center Of Victoria
@@ -17,12 +18,44 @@ const map = L.map('map', {
 })
 
 // Set The Map Theme
-L.tileLayer(themes[2], {
+const tileLayer = L.tileLayer(themes[2][0], {
+    // Credit Map Maker
+    // attribution: themes[2][1],
     // Set Maximum Zoom For Map
-    maxZoom: 19,
+    maxZoom: 22,
 })
 // Add tileLayer To Map
 .addTo(map);
+
+/* Default marker icon */
+const defaultIcon = {
+    stop: L.icon({
+        iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Map_pin_icon.svg/1504px-Map_pin_icon.svg.png',
+        iconSize: [30,  40],
+        iconAnchor: [15, 40]
+    }),
+
+    bus: L.icon({
+        iconUrl: '/img/bus.svg',
+        iconSize: [70,  70],
+        iconAnchor: [35, 35],
+    })
+}
+
+/* Larger marker icon for smaller screens */
+const mobileIcon = {
+    stop: L.icon({
+        iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Map_pin_icon.svg/1504px-Map_pin_icon.svg.png',
+        iconSize: [90,  120],
+        iconAnchor: [45, 120]
+    }),
+
+    bus: L.icon({
+        iconUrl: 'img/bus.svg',
+        iconSize: [140,  140],
+        iconAnchor: [70, 70]
+    }),
+}
 
 // Create Variable To Store Map Markers
 const markerLayer = L.layerGroup().addTo(map);
@@ -56,7 +89,8 @@ const updateMap = {
             const position = [bus.lat, bus.lng];
 
             // Create Marker
-            const marker = L.marker(position, {id: bus.vehicle_id}).addTo(markerLayer);
+            const marker = L.marker(position, {id: bus.vehicle_id}).addTo(markerLayer)
+            .setIcon(isMobile ? mobileIcon.bus : defaultIcon.bus);
 
             // add Event Listener
             marker.on('click', function() {
@@ -78,12 +112,13 @@ const updateMap = {
             const position = [stop.lat, stop.lng];
 
             // Create Marker
-            const marker = L.marker(position, {id: stop.id, code: stop.code}).addTo(markerLayer);
+            const marker = L.marker(position, {id: stop.id, code: stop.code}).addTo(markerLayer)
+            // Set Icon
+            .setIcon(isMobile ? mobileIcon.stop : defaultIcon.stop);
 
             // Add Event Listener
             marker.on('click', function() {
-                panelSet.upcomingBuses(stop.id);
-                console.log(stop.code);
+                panelSet.upcomingBuses(stop.code);
                 map.flyTo(position, 19);
             });
         }
@@ -113,27 +148,54 @@ const goTo = {
 }
 
 const panelSet = {
-    upcomingBuses: async function (stopId) {
-        const response = await fetch(`/map/upcoming/buses/${stopId}`);
+    setLoading: function(){
+        document.getElementById('dynamic-results').innerHTML = `
+            <img class="loading-img" src='https://cdn.pixabay.com/animation/2022/10/11/03/16/03-16-39-160_512.gif'>
+        `
+    },
+
+    hideSearchBar: function(){
+        document.getElementById('searchBar').style.display = 'none';
+    },
+
+    upcomingBuses: async function (stopCode) {
+        this.setLoading();
+        this.hideSearchBar();
+        
+        const response = await fetch(`/map/upcoming/buses/${stopCode}`);
         const html = await response.text();
-        document.getElementById('bus-results').innerHTML = html
+        
+        document.getElementById('sidePanel').classList.add("expand");
+        document.getElementById('dynamic-results').innerHTML = html
     },
 
     upcomingStops: async function (vehicleId) {
+        this.setLoading();
+        this.hideSearchBar();
+        
         const response = await fetch(`/map/upcoming/stops/${vehicleId}`);
         const html = await response.text();
-        document.getElementById('bus-results').innerHTML = html
+        
+        document.getElementById('sidePanel').classList.add("expand");
+        document.getElementById('dynamic-results').innerHTML = html
+    },
+
+    clear: () => {
+        document.getElementById('searchBar').style.display = 'flex';
+        document.getElementById('sidePanel').classList.remove("expand");
+        document.getElementById('dynamic-results').innerHTML = '';
     }
 }
 
 async function searchEnter(){
+    const searchBarText = document.getElementById('searchBar-text').value;
     if(mapType == 0){
-        const searchBarText = document.getElementById('searchBar-text').value;
-        const stopData = await goTo.stop(searchBarText);
-        panelSet.upcoming(stopData.id);
+        goTo.stop(searchBarText);
+        panelSet.upcomingBuses(searchBarText);
     }
     else if(mapType == 1){
-
+        goTo.bus(searchBarText);
+        panelSet.upcomingStops(searchBarText);
     }
 }
 
@@ -148,18 +210,56 @@ map.on('dragend zoomend load', function() {
     }
 });
 
-// Set Map View
+// Set Initial Map View
 map.setView(
     victoria, 
     16,
 );
 
-function changeMapType(type){
+function setMapType(type){
+    // Clear Side Panel If New Type Is Set
+    if(mapType != type){
+        panelSet.clear()
+    }
+
+    // Save New Type To Memory
     mapType = type;
+
+    // Update Map
     if(mapType == 0){
+        document.getElementById('searchBar-text').placeholder = 'Search Stop Code...'
         updateMap.stops();
     }
     else if(mapType == 1){
+        document.getElementById('searchBar-text').placeholder = 'Search Vehicle Id...'
         updateMap.positions();
     }
 }
+
+
+
+
+// get the user's location and show it on the map
+const userMarker = L.marker([0,0]).addTo(map);
+
+// get the user's location and show it on the map
+navigator.geolocation.watchPosition(function(position) {
+    var latlng = L.latLng(position.coords.latitude, position.coords.longitude);
+    userMarker.setLatLng(latlng);
+    if(!locationInitialized){
+        map.panTo(latlng);
+        locationInitialized = true;
+    }
+    setMapType(mapType);
+}, function(error) {
+    // document.body.innerHTML = error.message;
+}, {
+    enableHighAccuracy: true,  // use high accuracy mode if available
+    maximumAge: 30000,         // maximum age of cached position data (30 seconds)
+    timeout: 10000             // maximum time to wait for position data (10 seconds)
+});
+
+
+window.addEventListener('resize', function() {
+    // tileLayer.redraw();
+});

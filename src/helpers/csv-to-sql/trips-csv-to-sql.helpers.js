@@ -15,7 +15,7 @@ function createTripsTable(){
             if(err){
                 console.error(err.message)
             }
-            db.run(`CREATE TABLE trips_tmp (id INTEGER PRIMARY KEY, service_id INT, route_id INT, headsign TEXT)`, (err) => {
+            db.run(`CREATE TABLE trips_tmp (id INTEGER PRIMARY KEY, provider TEXT, service_id INT, route_id INT, headsign TEXT)`, (err) => {
                 
                 if(err){
                     console.error(err.message);
@@ -26,7 +26,7 @@ function createTripsTable(){
     })
 }
 
-function getJson(csv){
+function getJson(csv, provider){
     return new Promise(resolve => {
         csvtojson().fromFile(csv).then(async json => {
             json = json.map(
@@ -37,6 +37,7 @@ function getJson(csv){
                     trip_headsign
                 }) => ([
                     parseInt(trip_id),
+                    provider,
                     parseInt(service_id),
                     parseInt(route_id), 
                     trip_headsign
@@ -56,7 +57,7 @@ async function tripsCsvToSql(csv){
     const json = await getJson(csv)
 
     // Prepare Table For Insertion
-    const prep = db.prepare(`INSERT INTO trips_tmp (id, service_id, route_id, headsign) VALUES (?, ?, ?, ?)`);
+    const prep = db.prepare(`INSERT INTO trips_tmp (id, provider, service_id, route_id, headsign) VALUES (?, ?, ?, ?, ?)`);
 
     // Begin SQL Transaction
     await beginTransaction(db);

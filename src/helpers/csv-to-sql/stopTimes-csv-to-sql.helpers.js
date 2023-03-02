@@ -15,7 +15,7 @@ function createStopTimesTable(){
             if(err){
                 console.error(err.message)
             }
-            db.run(`CREATE TABLE stop_times_tmp (trip_id INT, scheduled_time TEXT, stop_id INT, stop_sequence INT)`, (err) => {
+            db.run(`CREATE TABLE stop_times_tmp (provider TEXT, trip_id INT, arrival_time TIME, departure_time TIME, stop_id INT, stop_sequence INT)`, (err) => {
                 if(err){
                     console.error(err.message);
                 }
@@ -25,18 +25,21 @@ function createStopTimesTable(){
     })
 }
 
-function getJson(csv){
+function getJson(csv, provider){
     return new Promise(resolve => {
         csvtojson().fromFile(csv).then(async json => {
             json = json.map(
                 ({
                     trip_id,
                     arrival_time, 
+                    departure_time,
                     stop_id,
                     stop_sequence
                 }) => ([
+                    provider,
                     parseInt(trip_id),
-                    arrival_time, 
+                    arrival_time,
+                    departure_time,
                     parseInt(stop_id),
                     parseInt(stop_sequence)
                 ])
@@ -46,15 +49,15 @@ function getJson(csv){
     })
 }
 
-async function stopTimesCsvToSql(csv){
+async function stopTimesCsvToSql(csv, provider){
     // Create Table
     await createStopTimesTable();
 
     // Parse And Filter Csv
-    const json = await getJson(csv);
+    const json = await getJson(csv, provider);
 
     // Prepare Table For Insertion
-    const prep = db.prepare(`INSERT INTO stop_times_tmp (trip_id, scheduled_time, stop_id, stop_sequence) VALUES (?, ?, ?, ?)`);
+    const prep = db.prepare(`INSERT INTO stop_times_tmp (provider, trip_id, arrival_time, departure_time, stop_id, stop_sequence) VALUES (?, ?, ?, ?, ?, ?)`);
 
     // Begin SQL Transaction
     await beginTransaction(db);

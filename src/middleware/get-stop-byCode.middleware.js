@@ -8,7 +8,14 @@ function getStop(req, res, next){
             console.error(err);
             return res.sendStatus(500);
         }
-        res.locals.stop = row;
+        
+        if(row == undefined){
+            res.locals.validStopCode = false;
+        }
+        else{
+            res.locals.validStopCode = true;
+            res.locals.stop = row;
+        }
         next();
     })
 }

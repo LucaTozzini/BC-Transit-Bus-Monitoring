@@ -6,10 +6,15 @@
     font-family: sans-serif;
 }
 
-body{
-    height: 100vh;
-    width: 100vw;
+body, html{
+    height: 100%;
+    width: 100%;
     display: flex;
+    overflow-x: hidden;
+}
+
+button{
+    cursor: pointer;
 }
 
 #main-container{
@@ -20,10 +25,13 @@ body{
 #map { 
     flex: 1;
 }
+
+.leaflet-marker-icon{
+    font-size: 0px;
+}
+
 #sidePanel{
-    height: 100%;
-    width: 30rem;
-    box-sizing: border-box;
+    width: 25rem;
     
     background-color: white;
     
@@ -39,23 +47,56 @@ body{
 
 #mapType-selectors{
     width: 100%;
-    height: 3rem;
     display: flex;
+    align-items: stretch;
     gap: .4rem;
 }
 
 .mapType-selector{
     flex: 1;
     border-radius: .3rem;
-    background-color: rgb(162, 0, 255);
+    height: 3rem;
+    
+    background-color: rgb(9, 190, 0);
+    
     display: flex;
     align-items: center;
     justify-content: center;
+    
     color: white;
     font-size: 1.2rem;
     font-weight: bolder;
     text-transform: capitalize;
-    cursor: pointer;
+}
+
+#result-header{
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+    align-items: center;
+}
+
+#result-title{
+    min-height: 2.7rem;
+    flex: 1;
+    font-size: 1.8rem;
+    font-weight: bolder;
+}
+
+#title-code{
+    font-size: 1.3rem;
+    font-weight: lighter;
+}
+
+#clear-button{
+    height: 2.5rem;
+    width: 2.5rem;
+    background-color: rgb(206, 206, 206);
+    border-radius: 50%;
+    background-image: url(https://upload.wikimedia.org/wikipedia/commons/thumb/a/a0/OOjs_UI_icon_close.svg/1200px-OOjs_UI_icon_close.svg.png);
+    background-position: center;
+    background-size: 60%;
+    background-repeat: no-repeat;
 }
 
 #searchBar{
@@ -84,6 +125,23 @@ body{
     cursor: pointer;
 }
 
+#dynamic-results{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: inherit;
+    
+    flex: 1;
+    overflow: auto;
+    width: 100%;
+}
+
+.loading-img{
+    height: 6rem;
+    width: 6rem;
+    margin: 4rem;
+}
+
 #bus-results{
     flex: 1;
     padding-bottom: 3rem;
@@ -104,5 +162,54 @@ body{
 
     display: flex;
     align-items: center;
-    gap: .5rem;
+    gap: .4rem;
+}
+
+.result-time{
+    width: 5rem;
+
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    justify-content: center;
+    gap: .2rem;
+}
+
+.result-time-arrival{
+    font-family: monospace;
+    font-weight: bold;
+    font-size: 1.05rem;
+    color: rgb(73, 73, 73);
+}
+
+.result-time-punctuality{
+    font-size: .8rem;
+    text-align: center;
+    color: grey;
+}
+
+.result-time-punctuality.Late{
+    color: red;
+}
+
+.result-time-punctuality.Early, .result-time-punctuality.onTime{
+    color: green;
+}
+
+@media (width < 65rem){
+    #main-container{
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #sidePanel{
+        width: calc(100% - 10vw);
+        padding: 2rem 5vw;
+        height: calc(11rem - 4rem);
+        transition: all 600ms;
+    }
+
+    #sidePanel.expand{
+        height: 30rem;
+        padding-bottom: 0;
+    }
 }

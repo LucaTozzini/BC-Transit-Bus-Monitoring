@@ -14,19 +14,19 @@ async function setUpGtfs(){
     console.log('download', folder)
 
     console.log('routes-CsvToSql');
-    await routesCsvToSql(gtfsPath+'/routes.txt');
+    await routesCsvToSql(gtfsPath+'/routes.txt', 'BC_Transit_Victoria');
 
     console.log('calendar-CsvToSql');
-    await calendarCsvToSql(gtfsPath+'/calendar.txt');
+    await calendarCsvToSql(gtfsPath+'/calendar.txt', 'BC_Transit_Victoria');
 
     console.log('stops-CsvToSql');
-    await stopsCsvToSql(gtfsPath+'/stops.txt');
+    await stopsCsvToSql(gtfsPath+'/stops.txt', 'BC_Transit_Victoria');
 
     console.log('trips-CsvToSql');
-    await tripsCsvToSql(gtfsPath+'/trips.txt');
+    await tripsCsvToSql(gtfsPath+'/trips.txt', 'BC_Transit_Victoria');
 
     console.log('stopTimes-CsvToSql');
-    await stopTimesCsvToSql(gtfsPath+'/stop_times.txt');
+    await stopTimesCsvToSql(gtfsPath+'/stop_times.txt', 'BC_Transit_Victoria');
 
     console.log('Set-up finished!')
 }

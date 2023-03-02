@@ -13,21 +13,37 @@
         />
         <!-- Style -->
         <link rel="stylesheet" href="/css/map.css">
+        <% if(userAgent.isMobile){ %>
+            <style>
+                html{
+                    font-size: 40px;
+                }
+                @media (orientation: landscape) {
+                    body, html{
+                        font-size: 16px;
+                    }
+                    #sidePanel{
+                        height: 100%
+                    }
+                }
+            </style>
+        <% } %>
     </head>
     <body>
         <div id="main-container">
             <div id="map"></div> 
             <div id="sidePanel">
                 <div id="mapType-selectors">
-                    <button class="mapType-selector" onclick="changeMapType(0)">Stops</button>
-                    <button class="mapType-selector" onclick="changeMapType(1)">Buses</button>
+                    <button class="mapType-selector" onclick="setMapType(0)">Stops</button>
+                    <button class="mapType-selector" onclick="setMapType(1)">Buses</button>
+                    <button class="mapType-selector" onclick="setMapType(2)">Routes</button>
                 </div>
                 <div id="searchBar">
-                    <input type='text' id="searchBar-text" placeholder="Search Bus Stop...">
+                    <input type='text' id="searchBar-text">
                     <button id="searchBar-button" onclick="searchEnter()"></button>
                 </div>
-                <div id="bus-results">
-                    <!-- Results Generated Here -->
+                <div id='dynamic-results'>
+                    <!-- Set Dynamically -->
                 </div>
             </div>
         </div>
@@ -46,6 +62,7 @@
     <script src="/scripts/map.scripts.js"></script>
     
     <script>
-        changeMapType(<%= type %>)
+        setMapType(<%= type %>);
+        const isMobile = <%= userAgent.isMobile %>;
     </script>
 </html>

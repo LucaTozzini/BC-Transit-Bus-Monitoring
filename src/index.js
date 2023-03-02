@@ -1,7 +1,8 @@
 import ejs from 'ejs';
 import express from 'express';
+import useragent from 'express-useragent';
 
-import updateGtfrt from './helpers/update-gtfrt.helpers.js';
+import updateGtfsrt from './helpers/update-gtfsrt.helpers.js';
 
 import mapRouter from './routes/map.routes.js';
 import nextRouter from './routes/next.routes.js';
@@ -11,8 +12,10 @@ import defaultRouter from './routes/default.routes.js';
 const app = express();
 const PORT = 80;
 
-app.set('view engine', 'ejs');
+
 app.use(express.json());
+app.use(useragent.express());
+app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 app.use('/', defaultRouter);
@@ -25,4 +28,4 @@ app.listen(PORT, (err) => {
 })
 
 // Start Gtfrt Updater
-updateGtfrt(10)
+updateGtfsrt(10)
