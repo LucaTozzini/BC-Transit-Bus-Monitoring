@@ -1,4 +1,4 @@
-data/database.db
+data/
 node_modules/
 env.js
 *.zip
