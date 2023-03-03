@@ -1,3 +1,4 @@
-/data/database.db
-/node_modules
+data/
+node_modules/
 .env
+*.zip
