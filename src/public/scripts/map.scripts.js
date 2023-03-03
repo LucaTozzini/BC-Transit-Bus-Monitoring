@@ -39,6 +39,12 @@ const defaultIcon = {
         iconUrl: '/img/bus.svg',
         iconSize: [70,  70],
         iconAnchor: [35, 35],
+    }),
+
+    user: L.icon({
+        iconUrl: '/img/userLocation.png',
+        iconSize: [70,  70],
+        iconAnchor: [35, 35],
     })
 }
 
@@ -240,26 +246,33 @@ function setMapType(type){
 
 
 // get the user's location and show it on the map
-const userMarker = L.marker([0,0]).addTo(map);
+const userMarker = L.marker([0,0]).setIcon(defaultIcon.user).setZIndexOffset(1000);
+
+const userMarkerArea = L.circle([0,0], {
+    color: 'blue',
+    fillColor: 'blue',
+    fillOpacity: 0.1,
+    opacity: 0.2,   
+    radius: 50
+});
 
 // get the user's location and show it on the map
 navigator.geolocation.watchPosition(function(position) {
-    var latlng = L.latLng(position.coords.latitude, position.coords.longitude);
-    userMarker.setLatLng(latlng);
+    const latlng = L.latLng(position.coords.latitude, position.coords.longitude);
+
+    userMarker.setLatLng(latlng).remove().addTo(map);
+    userMarkerArea.setLatLng(latlng).remove().addTo(map);
+
     if(!locationInitialized){
         map.panTo(latlng);
         locationInitialized = true;
     }
     setMapType(mapType);
-}, function(error) {
-    // document.body.innerHTML = error.message;
+
+}, function(err) {
+    console.error(err.message);
 }, {
-    enableHighAccuracy: true,  // use high accuracy mode if available
+    enableHighAccuracy: false,  // use high accuracy mode if available
     maximumAge: 30000,         // maximum age of cached position data (30 seconds)
     timeout: 10000             // maximum time to wait for position data (10 seconds)
-});
-
-
-window.addEventListener('resize', function() {
-    // tileLayer.redraw();
 });
