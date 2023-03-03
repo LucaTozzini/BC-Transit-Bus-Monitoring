@@ -1,9 +1,8 @@
 import getJsonFromApi from "./get-json-from-api.helpers.js";
 
-import dotenv from 'dotenv';
-dotenv.config({path:'C:/Users/luca_/github/BC-Transit-Bus-Monitoring/.env'});
+import env from '../../env.js';
 
-const url = `https://api.openweathermap.org/data/2.5/weather?lat=48.4284&lon=-123.3656&appid=${process.env.OPENWEATHER_KEY}&units=metric`;
+const url = `https://api.openweathermap.org/data/2.5/weather?lat=48.4284&lon=-123.3656&appid=${env.OPENWEATHER_KEY}&units=metric`;
 
 const openWeather = {
     all: () => {

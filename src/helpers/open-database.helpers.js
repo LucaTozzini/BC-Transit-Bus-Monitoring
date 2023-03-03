@@ -1,9 +1,8 @@
 import sqlite3 from 'sqlite3';
 
-import dotenv from 'dotenv';
-dotenv.config({path:'C:/Users/luca_/github/BC-Transit-Bus-Monitoring/.env'});
+import env from '../../env.js';
 
-const dbPath = process.env.DATABASE_FILE;
+const dbPath = env.DATABASE_FILE;
 
 function openDatabase(){
     const db = new sqlite3.Database(dbPath, sqlite3.OPEN_READWRITE, (err) => {

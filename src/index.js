@@ -5,7 +5,6 @@ import useragent from 'express-useragent';
 import updateGtfsrt from './helpers/update-gtfsrt.helpers.js';
 
 import mapRouter from './routes/map.routes.js';
-import nextRouter from './routes/next.routes.js';
 import dataRouter from './routes/data.routes.js';
 import defaultRouter from './routes/default.routes.js';
 
@@ -19,7 +18,6 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 
 app.use('/', defaultRouter);
-app.use('/next', nextRouter);
 app.use('/data', dataRouter);
 app.use('/map', mapRouter);
 
