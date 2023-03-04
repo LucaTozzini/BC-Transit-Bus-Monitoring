@@ -1,7 +1,11 @@
 import downloadFile from './download-file.helpres.js';
 import gtfs from 'gtfs-realtime-bindings';
 
-const fileUrl = 'http://victoria.mapstrat.com/current/gtfrealtime_VehiclePositions.bin';
+
+const binUrl = {
+    BC_Transit_Victoria: 'http://victoria.mapstrat.com/current/gtfrealtime_VehiclePositions.bin',
+
+}
 
 function gtfsPosition(){
     return new Promise(async resolve => {
@@ -19,5 +23,7 @@ function gtfsPosition(){
         }
     })
 }
+
+
 
 export default gtfsPosition;

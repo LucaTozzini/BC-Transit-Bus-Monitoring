@@ -9,11 +9,13 @@ import gtfsTrip from "./gtfs-trip.helpers.js";
 
 const db = openDatabase();
 
+
+
 function setUpPositions(){
     return new Promise(resolve => {
         db.run(
             `CREATE TABLE IF NOT EXISTS gtf_positions_tmp(
-                id INTEGER PRIMARY KEY,
+                id INT,
                 trip_id INT,
                 lat REAL,
                 lng REAL,

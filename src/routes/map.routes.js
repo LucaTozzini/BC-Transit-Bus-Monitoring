@@ -1,7 +1,7 @@
 import express from 'express';
 import upcomingBuses from '../middleware/upcoming-buses.middleware.js';
 import upcomingStops from '../middleware/upcoming-stops.middleware.js';
-import getStop from '../middleware/get-stop-byCode.middleware.js';
+import getStopByCode from '../middleware/get-stop-byCode.middleware.js';
 
 import getMapBounds from '../middleware/get-mapBounds.middleware.js'
 import getStops from '../middleware/get-stops.middleware.js';
@@ -17,7 +17,7 @@ router.get('/', async (req, res) => {
 
 router.get('/upcoming/buses/:stopCode/:provider',
     upcomingBuses,
-    getStop,
+    getStopByCode,
     (req, res) => {
         const upcoming = res.locals.upcoming;
 
@@ -86,7 +86,7 @@ router.get('/upcoming/buses/:stopCode/:provider',
 
         const fullHtml = `
             <div id="result-header">
-                <div id="result-title"> ${res.locals.validStopCode ? `${res.locals.stop.name} <span id="title-code"> (${res.locals.stop.code}) </span>` : 'No Stop Found'} </div>
+                <div id="result-title"> ${res.locals.validStopCode  ? `${res.locals.stop.name} <span id="title-code"> (${res.locals.stop.code}) </span>` : 'No Stop Found'} </div>
                 <button id="clear-button" onclick="panelSet.clear()"></div>
             </div>
             <div id="bus-results">

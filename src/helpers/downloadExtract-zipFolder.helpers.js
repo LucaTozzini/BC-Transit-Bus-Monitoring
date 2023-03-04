@@ -1,12 +1,12 @@
-import http from 'http';
+import https from 'https';
 import fs from 'fs';
 import AdmZip from 'adm-zip';
 
 function downloadExtractZipFolder(zipFileUrl, destinationPath) {
   return new Promise((resolve, reject) => {
-    http.get(zipFileUrl, (response) => {
+    https.get(zipFileUrl, (response) => {
       if (response.statusCode !== 200) {
-        reject(new Error(`Failed to download zip file: ${response.statusCode} ${response.statusMessage}`));
+        reject(new Error('Failed to download zip file'));
       }
 
       const zipData = [];

@@ -1,4 +1,5 @@
 let mapType, locationInitialized = false;
+const minMarkerZoom = 12;
 
 // Themes For OpenStreetMap
 const themes = [
@@ -14,7 +15,8 @@ const victoria = [48.4284, -123.3656];
 // Declare Map Variable
 const map = L.map('map', {
     // Set Minimum Zoom Value
-    // minZoom: 12
+    minZoom: 3,
+    worldCopyJump: true,
 })
 
 // Set The Map Theme
@@ -28,9 +30,9 @@ const tileLayer = L.tileLayer(themes[2], {
 /* Default marker icon */
 const defaultIcon = {
     stop: L.icon({
-        iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Map_pin_icon.svg/1504px-Map_pin_icon.svg.png',
-        iconSize: [30,  40],
-        iconAnchor: [15, 40]
+        iconUrl: 'https://i.pinimg.com/474x/e6/dd/25/e6dd258ac0b672c3645d7865cd44ce0d--bus-app-app-logo.jpg',
+        iconSize: [20,  20],
+        iconAnchor: [10, 10]
     }),
 
     bus: L.icon({
@@ -49,9 +51,9 @@ const defaultIcon = {
 /* Larger marker icon for smaller screens */
 const mobileIcon = {
     stop: L.icon({
-        iconUrl: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/ed/Map_pin_icon.svg/1504px-Map_pin_icon.svg.png',
-        iconSize: [90,  120],
-        iconAnchor: [45, 120]
+        iconUrl: 'https://i.pinimg.com/474x/e6/dd/25/e6dd258ac0b672c3645d7865cd44ce0d--bus-app-app-logo.jpg',
+        iconSize: [50,  50],
+        iconAnchor: [25, 25]
     }),
 
     bus: L.icon({
@@ -82,9 +84,15 @@ const updateMap = {
     },
 
     positions: async function () {
+        
+        if(map.getZoom() <= minMarkerZoom){
+            markerLayer.clearLayers();
+            return
+        };
+        
         // Fetch Data
         const data = await this.postReq('/map/points/buses');
-
+        
         // Reset Markers
         markerLayer.clearLayers();
 
@@ -105,9 +113,14 @@ const updateMap = {
     },
 
     stops: async function () {
+        if(map.getZoom() <= minMarkerZoom){
+            markerLayer.clearLayers();
+            return
+        };
+        
         // Fetch Data
         const data = await this.postReq('/map/points/stops'); 
-
+        
         // Reset Markers
         markerLayer.clearLayers();
 
@@ -123,6 +136,7 @@ const updateMap = {
             // Add Event Listener
             marker.on('click', function() {
                 panelSet.upcomingBuses(stop.code, stop.provider);
+                console.log(stop)
                 map.flyTo(position, 19);
             });
         }
@@ -130,9 +144,9 @@ const updateMap = {
 }
 
 const goTo = {
-    stop: (stopCode) => {
+    stop: (stopCode, provider) => {
         return new Promise(async resolve => {
-            const data = await fetch(`/data/stop/${stopCode}`);
+            const data = await fetch(`/data/stop/${stopCode}/${provider}`);
             const json = await data.json();
             const position = [json.lat, json.lng];
             resolve(json);
@@ -194,8 +208,8 @@ const panelSet = {
 async function searchEnter(){
     const searchBarText = document.getElementById('searchBar-text').value;
     if(mapType == 0){
-        goTo.stop(searchBarText);
-        panelSet.upcomingBuses(searchBarText);
+        goTo.stop(searchBarText, 'BC_Transit_Victoria');
+        panelSet.upcomingBuses(searchBarText, 'BC_Transit_Victoria');
     }
     else if(mapType == 1){
         goTo.bus(searchBarText);

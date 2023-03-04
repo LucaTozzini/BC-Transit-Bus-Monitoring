@@ -10,20 +10,24 @@ import calendarCsvToSql from "./json-to-sql/calendar-json-to-sql.helpers.js";
 import env from "../../env.js";
 
 const gtfsUrls = {
-    BC_Transit_Nanaimo: 'http://nanaimo.mapstrat.com/current/google_transit.zip',
-    BC_Transit_Kelowna: 'http://kelowna.mapstrat.com/current/google_transit.zip',
-    BC_Transit_Victoria: 'http://victoria.mapstrat.com/current/google_transit.zip',
-    BC_Transit_Whistler: 'http://whistler.mapstrat.com/current/google_transit.zip',
-    BC_Transit_Kamloops: 'http://kamloops.mapstrat.com/current/google_transit.zip',
-    BC_Transit_Squamish: 'http://squamish.mapstrat.com/current/google_transit.zip',
-    BC_Transit_Fort_St_John: 'http://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=28',
-    BC_Transit_Port_Alberni: 'http://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=11',
-    BC_Transit_Powell_River: 'http://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=29',
-    BC_Transit_West_Kootenay: 'http://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=20',
-    BC_Transit_Prince_George: 'http://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=22',
-    BC_Transit_Prince_Rupert: 'http://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=23',
-    BC_Transit_Campbell_River: 'http://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=12',
-    BC_Transit_Sunshine_Coast: 'http://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=18',
+    // BC Transit
+    BC_Transit_Nanaimo: 'https://nanaimo.mapstrat.com/current/google_transit.zip',
+    BC_Transit_Kelowna: 'https://kelowna.mapstrat.com/current/google_transit.zip',
+    BC_Transit_Victoria: 'https://victoria.mapstrat.com/current/google_transit.zip',
+    BC_Transit_Whistler: 'https://whistler.mapstrat.com/current/google_transit.zip',
+    BC_Transit_Kamloops: 'https://kamloops.mapstrat.com/current/google_transit.zip',
+    BC_Transit_Squamish: 'https://squamish.mapstrat.com/current/google_transit.zip',
+    BC_Transit_Fort_St_John: 'https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=28',
+    BC_Transit_Port_Alberni: 'https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=11',
+    BC_Transit_Powell_River: 'https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=29',
+    BC_Transit_West_Kootenay: 'https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=20',
+    BC_Transit_Prince_George: 'https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=22',
+    BC_Transit_Prince_Rupert: 'https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=23',
+    BC_Transit_Campbell_River: 'https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=12',
+    BC_Transit_Sunshine_Coast: 'https://bct.tmix.se/Tmix.Cap.TdExport.WebApi/gtfs/?operatorIds=18',
+
+    // Translink
+    Translink: 'https://gtfs-static.translink.ca/gtfs/google_transit.zip?_gl=1*1c1364t*_ga*MTQxMDQ4NjU4Ni4xNjc2NzA0NjQz*_ga_2559ZWBT54*MTY3Nzg4NTg0Ny42LjAuMTY3Nzg4NTg1MC41Ny4wLjA.',
 };
 
 let calendarJson = [], routesJson = [], stopTimesJson = [], stopsJson = [], tripsJson = [];
@@ -151,8 +155,8 @@ function buildStopTimesJson(){
                 }) => ([
                     provider,
                     parseInt(trip_id),
-                    arrival_time,
-                    departure_time,
+                    `${arrival_time.split(':')[0].padStart(2, '0')}:${arrival_time.split(':')[1].padStart(2, '0')}:${arrival_time.split(':')[2].padStart(2, '0')}`,
+                    `${departure_time.split(':')[0].padStart(2, '0')}:${departure_time.split(':')[1].padStart(2, '0')}:${departure_time.split(':')[2].padStart(2, '0')}`,
                     parseInt(stop_id),
                     parseInt(stop_sequence)
                 ])

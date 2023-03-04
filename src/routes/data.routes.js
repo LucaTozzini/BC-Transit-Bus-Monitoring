@@ -58,7 +58,7 @@ router.get('/stops',
     }
 );
 
-router.get('/stop/:stopCode',
+router.get('/stop/:stopCode/:provider',
     getStopByCode,
     (req, res) => {
         res.json(res.locals.stop);
