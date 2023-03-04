@@ -25,36 +25,9 @@ function createStopTimesTable(){
     })
 }
 
-function getJson(csv, provider){
-    return new Promise(resolve => {
-        csvtojson().fromFile(csv).then(async json => {
-            json = json.map(
-                ({
-                    trip_id,
-                    arrival_time, 
-                    departure_time,
-                    stop_id,
-                    stop_sequence
-                }) => ([
-                    provider,
-                    parseInt(trip_id),
-                    arrival_time,
-                    departure_time,
-                    parseInt(stop_id),
-                    parseInt(stop_sequence)
-                ])
-            );
-            resolve(json);
-        })
-    })
-}
-
-async function stopTimesCsvToSql(csv, provider){
+async function stopTimesCsvToSql(json){
     // Create Table
     await createStopTimesTable();
-
-    // Parse And Filter Csv
-    const json = await getJson(csv, provider);
 
     // Prepare Table For Insertion
     const prep = db.prepare(`INSERT INTO stop_times_tmp (provider, trip_id, arrival_time, departure_time, stop_id, stop_sequence) VALUES (?, ?, ?, ?, ?, ?)`);
@@ -66,7 +39,9 @@ async function stopTimesCsvToSql(csv, provider){
     let i = 0;
     for(const stopTime of json){
         i++;
-        console.log(i, '/', json.length);
+        if(i % 100000 == 0){
+            console.log(i, '/', json.length);
+        }
         // Insert Into Table
         await insertRow(prep, stopTime);
     }

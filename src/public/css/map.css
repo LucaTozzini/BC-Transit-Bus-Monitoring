@@ -193,7 +193,7 @@ button{
 }
 
 .result-time-punctuality.Early, .result-time-punctuality.onTime{
-    color: green;
+    color: rgb(0, 184, 0);
 }
 
 @media (width < 65rem){

@@ -15,7 +15,7 @@ function createStopsTable(){
             if(err){
                 console.error(err.message)
             }
-            db.run(`CREATE TABLE stops_tmp (id INTEGER PRIMARY KEY, provider TEXT, code INT, name TEXT, lat REAL, lng REAL)`, (err) => {
+            db.run(`CREATE TABLE stops_tmp (id INT, provider TEXT, code INT, name TEXT, lat REAL, lng REAL)`, (err) => {
                 if(err){
                     console.error(err.message);
                 }
@@ -25,36 +25,9 @@ function createStopsTable(){
     })
 }
 
-function getJson(csv, provider){
-    return new Promise(resolve => {
-        csvtojson().fromFile(csv).then(async json => {
-            json = json.map(
-                ({
-                    stop_id, 
-                    stop_code, 
-                    stop_name, 
-                    stop_lat, 
-                    stop_lon
-                }) => ([
-                    parseInt(stop_id), 
-                    provider,
-                    parseInt(stop_code), 
-                    stop_name, 
-                    parseFloat(stop_lat), 
-                    parseFloat(stop_lon)
-                ])
-            );
-            resolve(json);
-        })
-    })
-}
-
-async function stopsCsvToSql(csv, provider){
+async function stopsCsvToSql(json){
     // Create Table
     await createStopsTable();
-
-    // Parse And Filter Csv
-    const json = await getJson(csv, provider);
 
     // Begin SQL Transaction
     await beginTransaction(db);

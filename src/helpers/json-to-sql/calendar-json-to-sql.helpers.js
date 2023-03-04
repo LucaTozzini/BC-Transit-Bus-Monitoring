@@ -11,7 +11,7 @@ const db = openDatabase();
 
 function createCalendarTable(){
     return new Promise(resolve => {
-        db.run(`CREATE TABLE IF NOT EXISTS calendar_tmp (service_id INTEGER PRIMARY KEY, provider TEXT, monday INT, tuesday INT, wednesday INT, thursday INT, friday INT, saturday INT, sunday INT)`, (err) => {
+        db.run(`CREATE TABLE IF NOT EXISTS calendar_tmp (service_id INT, provider TEXT, monday INT, tuesday INT, wednesday INT, thursday INT, friday INT, saturday INT, sunday INT)`, (err) => {
             if(err){
                 console.error(err.message);
             }
@@ -20,40 +20,10 @@ function createCalendarTable(){
     })
 }
 
-function getJson(csv, provider){
-    return new Promise(resolve => {
-        csvtojson().fromFile(csv).then(async json => 
-            {
-                json = json.map(
-                    ({
-                        service_id,
-                        monday,
-                        tuesday,
-                        wednesday,
-                        thursday,
-                        friday,
-                        saturday,
-                        sunday
-                    }) => ([
-                        parseInt(service_id),
-                        provider,
-                        parseInt(monday),
-                        parseInt(tuesday),
-                        parseInt(wednesday),
-                        parseInt(thursday),
-                        parseInt(friday),
-                        parseInt(saturday),
-                        parseInt(sunday)
-                    ])
-                );
-                resolve(json)
-            }
-        )
-    })
-}
-
-async function calendarCsvToSql(csv, provider){
+async function calendarCsvToSql(json){
+    // 
     await dropTable(db, 'calendar_tmp');
+    
     // Create Tmp Table
     await createCalendarTable();
     
@@ -62,9 +32,6 @@ async function calendarCsvToSql(csv, provider){
     
     // Prepare Table for Insertion
     const prep = db.prepare(`INSERT INTO calendar_tmp(service_id, provider, monday, tuesday, wednesday, thursday, friday, saturday, sunday) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`);
-
-    // Get Json From Csv
-    const json = await getJson(csv, provider);
 
     // Loop Through Data
     for(const service of json){

@@ -2,10 +2,10 @@ let mapType, locationInitialized = false;
 
 // Themes For OpenStreetMap
 const themes = [
-    ['https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', ''],
-    ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', ''],
-    ['https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>'],
-    ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', '']
+    'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png',
+    'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+    'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
 ];
 
 // Coordinates Of Center Of Victoria
@@ -14,13 +14,11 @@ const victoria = [48.4284, -123.3656];
 // Declare Map Variable
 const map = L.map('map', {
     // Set Minimum Zoom Value
-    minZoom: 12
+    // minZoom: 12
 })
 
 // Set The Map Theme
-const tileLayer = L.tileLayer(themes[2][0], {
-    // Credit Map Maker
-    // attribution: themes[2][1],
+const tileLayer = L.tileLayer(themes[2], {
     // Set Maximum Zoom For Map
     maxZoom: 22,
 })
@@ -118,13 +116,13 @@ const updateMap = {
             const position = [stop.lat, stop.lng];
 
             // Create Marker
-            const marker = L.marker(position, {id: stop.id, code: stop.code}).addTo(markerLayer)
+            const marker = L.marker(position, {id: stop.id, code: stop.code, provider: stop.provider}).addTo(markerLayer)
             // Set Icon
             .setIcon(isMobile ? mobileIcon.stop : defaultIcon.stop);
 
             // Add Event Listener
             marker.on('click', function() {
-                panelSet.upcomingBuses(stop.code);
+                panelSet.upcomingBuses(stop.code, stop.provider);
                 map.flyTo(position, 19);
             });
         }
@@ -164,11 +162,11 @@ const panelSet = {
         document.getElementById('searchBar').style.display = 'none';
     },
 
-    upcomingBuses: async function (stopCode) {
+    upcomingBuses: async function (stopCode, provider) {
         this.setLoading();
         this.hideSearchBar();
         
-        const response = await fetch(`/map/upcoming/buses/${stopCode}`);
+        const response = await fetch(`/map/upcoming/buses/${stopCode}/${provider}`);
         const html = await response.text();
         
         document.getElementById('sidePanel').classList.add("expand");

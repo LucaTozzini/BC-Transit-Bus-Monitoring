@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
     res.render('map', {type, userAgent});
 });
 
-router.get('/upcoming/buses/:stopCode',
+router.get('/upcoming/buses/:stopCode/:provider',
     upcomingBuses,
     getStop,
     (req, res) => {
