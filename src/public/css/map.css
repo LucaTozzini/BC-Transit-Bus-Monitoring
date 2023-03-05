@@ -33,8 +33,6 @@ button{
 #sidePanel{
     width: 20rem;
     
-    /* background-color: white; */
-    
     border-left: .07rem solid rgb(214, 214, 214);
     padding: 1.2rem 1rem;
     padding-bottom: 0;
@@ -157,7 +155,7 @@ button{
     width: 100%;
     height: 5rem;
     box-sizing: border-box;
-    padding: 0 1rem;
+    padding: 0 .5rem;
     border: .1rem solid rgb(227, 227, 227);
 
     display: flex;
@@ -167,6 +165,7 @@ button{
 
 .result-time{
     width: 5rem;
+    flex-shrink: 0;
 
     display: flex;
     align-items: center;

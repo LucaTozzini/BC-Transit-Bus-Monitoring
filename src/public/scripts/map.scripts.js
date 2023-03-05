@@ -5,7 +5,7 @@ const minPosZoom = 10;
 let routeToDraw = {
     queued: false,
     headsign: '',
-    provider: ''
+    provider: '',
 }
 
 // Themes For OpenStreetMap
@@ -302,7 +302,7 @@ navigator.geolocation.watchPosition(function(position) {
 
 
 let route = L.polyline([], {
-    color: 'red',
+    color: '#00a6ff',
     weight: 8
 })
 
