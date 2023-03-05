@@ -1,5 +1,4 @@
-import openDatabase from "../helpers/open-database.helpers.js";
-const db = openDatabase()
+import db from '../helpers/database-pool.helpers.js';
 
 function getPositionByVehicleId(req, res, next){
     const vehicleId = parseInt(req.params.vehicleId)

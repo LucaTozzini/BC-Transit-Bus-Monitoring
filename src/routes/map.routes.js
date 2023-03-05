@@ -3,6 +3,8 @@ import upcomingBuses from '../middleware/upcoming-buses.middleware.js';
 import upcomingStops from '../middleware/upcoming-stops.middleware.js';
 import getStopByCode from '../middleware/get-stop-byCode.middleware.js';
 
+import db from '../helpers/database-pool.helpers.js';
+
 import getMapBounds from '../middleware/get-mapBounds.middleware.js'
 import getStops from '../middleware/get-stops.middleware.js';
 import getBusPositions from '../middleware/get-busPositions.middleware.js';
@@ -98,7 +100,7 @@ router.get('/upcoming/buses/:stopCode/:provider',
     }
 );
 
-router.get('/upcoming/stops/:vehicleId',
+router.get('/upcoming/stops/:vehicleId/:provider',
     upcomingStops,
     (req, res) => {
         const upcoming = res.locals.upcomingStops;
@@ -106,7 +108,10 @@ router.get('/upcoming/stops/:vehicleId',
         for(const stop of upcoming){
             html += `
                 <div class="bus-result">
-                    <div>${stop.departure_time}</div>
+                    <div class="result-time">
+                        <div class="result-time-arrival">${stop.departure_time.split(':')[0]}:${stop.departure_time.split(':')[1]}</div>
+                        <div class="result-time-punctuality"> Scheduled </div> 
+                    </div>
                     <div>${stop.name}</div>
                 </div>
             `
@@ -144,6 +149,28 @@ router.post('/points/buses',
     (req, res) => {
         res.status(200).json(res.locals.busPositions);
     }
-)
+);
+
+router.get('/points/route/:tripId/:provider', (req, res) => {
+    db.all(`
+        SELECT sh.*, tr.headsign
+        FROM shapes AS sh
+        JOIN (
+            SELECT *
+            FROM trips
+            WHERE id = ? AND provider = ?
+            LIMIT 1
+        ) AS tr ON tr.shape_id = sh.id AND tr.provider = sh.provider
+        ORDER BY shape_pt_sequence ASC
+    `, [req.params.tripId, req.params.provider], (err, rows) => {
+        if(err){
+            console.error(err)
+            res.send(err.message);
+        }
+        else{
+            res.json(rows);
+        }
+    })
+})
 
 export default router;

@@ -1,4 +1,4 @@
-import http from 'http';
+import https from 'https';
 
 function downloadFile(fileUrl) {
   return new Promise((resolve, reject) => {
@@ -8,7 +8,7 @@ function downloadFile(fileUrl) {
       }
     };
 
-    http.get(fileUrl, options, (response) => {
+    https.get(fileUrl, options, (response) => {
       if (response.statusCode !== 200) {
         console.error(`Failed to download file: ${response.statusCode} ${response.statusMessage}`);
         reject(500);

@@ -6,6 +6,7 @@ import stopTimesCsvToSql from "./json-to-sql/stopTimes-json-to-sql.helpers.js";
 import tripsCsvToSql from "./json-to-sql/trips-json-to-sql.helpers.js";
 import routesCsvToSql from "./json-to-sql/routes-json-to-sql.helpers.js";
 import calendarCsvToSql from "./json-to-sql/calendar-json-to-sql.helpers.js";
+import shapesCsvToSql from "./json-to-sql/shapes-json-to-sql.helpers.js";
 
 import env from "../../env.js";
 
@@ -28,9 +29,12 @@ const gtfsUrls = {
 
     // Translink
     Translink: 'https://gtfs-static.translink.ca/gtfs/google_transit.zip?_gl=1*1c1364t*_ga*MTQxMDQ4NjU4Ni4xNjc2NzA0NjQz*_ga_2559ZWBT54*MTY3Nzg4NTg0Ny42LjAuMTY3Nzg4NTg1MC41Ny4wLjA.',
+
+    // Metrolinx
+    Metrolinx: 'https://www.gotransit.com/static_files/gotransit/assets/Files/GO_GTFS.zip?v=1677983367811',
 };
 
-let calendarJson = [], routesJson = [], stopTimesJson = [], stopsJson = [], tripsJson = [];
+let calendarJson = [], routesJson = [], stopTimesJson = [], stopsJson = [], tripsJson = [], shapesJson = [];
 
 const gtfsPath = env.GTFS_DATA;
 
@@ -52,6 +56,9 @@ function csvToJson(csv){
     return new Promise(resolve => {
         csvtojson().fromFile(csv).then(json => {
             resolve(json)
+        }).catch(err => {
+            console.error(err.message);
+            resolve([]);
         })
     })
 }
@@ -168,6 +175,31 @@ function buildStopTimesJson(){
     })
 }
 
+function buildShapesJson(){
+    return new Promise(async resolve => {
+        for(const provider in gtfsUrls){
+            let json = await csvToJson(`${gtfsPath}/${provider}/shapes.txt`);
+            json = json.map(
+                ({
+                    shape_id,
+                    shape_pt_lat,
+                    shape_pt_lon,
+                    shape_pt_sequence
+                }) => ([
+                    parseInt(shape_id),
+                    provider,
+                    parseFloat(shape_pt_lat),
+                    parseFloat(shape_pt_lon),
+                    parseInt(shape_pt_sequence)
+                ])
+            );
+            shapesJson.push(json);
+        }
+        shapesJson = shapesJson.reduce((acc, curr) => acc.concat(curr), []);
+        resolve();
+    })
+}
+
 function buildTripsJson(){
     return new Promise(async resolve => {
         for(const provider in gtfsUrls){
@@ -177,13 +209,15 @@ function buildTripsJson(){
                     trip_id,
                     service_id,
                     route_id, 
-                    trip_headsign
+                    trip_headsign,
+                    shape_id,
                 }) => ([
                     parseInt(trip_id),
                     provider,
                     parseInt(service_id),
                     parseInt(route_id), 
-                    trip_headsign
+                    trip_headsign,
+                    parseInt(shape_id),
                 ])
             );
             tripsJson.push(json);
@@ -198,13 +232,25 @@ async function buildDatabase(){
     await downloadFolders();
     
     // Parse Data
-    console.log('Parsing Data');
+    console.log('Parsing Calendars');
     await buildCalendarJson();
+
+    console.log('Parsing Routes');
     await buildRoutesJson();
+
+    console.log('Parsing Stops');
     await buildStopsJson();
+
+    console.log('Parsing Stop Times');
     await buildStopTimesJson();
+
+    console.log('Parsing Trips');
     await buildTripsJson();
 
+    console.log('Parsing Shapes');
+    await buildShapesJson();
+
+    // Write To Database
     console.log('routes-CsvToSql');
     await routesCsvToSql(routesJson);
 
@@ -219,6 +265,9 @@ async function buildDatabase(){
 
     console.log('stopTimes-CsvToSql');
     await stopTimesCsvToSql(stopTimesJson);
+
+    console.log('shapes-CsvToSql')
+    await shapesCsvToSql(shapesJson);
 
     console.log('Set-up finished!')
 }

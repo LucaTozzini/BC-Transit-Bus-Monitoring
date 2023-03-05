@@ -1,6 +1,4 @@
-import openDatabase from "../helpers/open-database.helpers.js";
-
-const db = openDatabase()
+import db from '../helpers/database-pool.helpers.js';
 
 
 function getStops(req, res, next){

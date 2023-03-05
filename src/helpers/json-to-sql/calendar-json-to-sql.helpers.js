@@ -1,13 +1,10 @@
-import csvtojson from 'csvtojson';
-import openDatabase from '../open-database.helpers.js';
+import db from '../database-pool.helpers.js';
 
 import beginTransaction from '../sql/beginTransaction.helpers.js';
 import commitToDatabase from '../sql/commit-to-database.helpers.js';
 import renameTable from '../sql/renameTable.helpers.js';
 import dropTable from '../sql/dropTable.helpers.js';
 import insertRow from '../sql/insertRow.helpers.js';
-
-const db = openDatabase();
 
 function createCalendarTable(){
     return new Promise(resolve => {

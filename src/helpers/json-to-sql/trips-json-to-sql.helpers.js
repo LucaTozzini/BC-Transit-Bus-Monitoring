@@ -1,5 +1,4 @@
-import csvtojson from 'csvtojson';
-import openDatabase from '../open-database.helpers.js';
+import db from '../database-pool.helpers.js';
 
 import insertRow from '../sql/insertRow.helpers.js';
 import renameTable from '../sql/renameTable.helpers.js';
@@ -7,15 +6,13 @@ import dropTable from '../sql/dropTable.helpers.js';
 import beginTransaction from '../sql/beginTransaction.helpers.js';
 import commitToDatabase from '../sql/commit-to-database.helpers.js';
 
-const db = openDatabase();
-
 function createTripsTable(){
     return new Promise(resolve => {
         db.run(`DROP TABLE IF EXISTS trips_tmp`, (err) => {
             if(err){
                 console.error(err.message)
             }
-            db.run(`CREATE TABLE trips_tmp (id INT, provider TEXT, service_id INT, route_id INT, headsign TEXT)`, (err) => {
+            db.run(`CREATE TABLE trips_tmp (id INT, provider TEXT, service_id INT, route_id INT, headsign TEXT, shape_id INT)`, (err) => {
                 
                 if(err){
                     console.error(err.message);
@@ -31,7 +28,7 @@ async function tripsCsvToSql(json){
     await createTripsTable();
     
     // Prepare Table For Insertion
-    const prep = db.prepare(`INSERT INTO trips_tmp (id, provider, service_id, route_id, headsign) VALUES (?, ?, ?, ?, ?)`);
+    const prep = db.prepare(`INSERT INTO trips_tmp (id, provider, service_id, route_id, headsign, shape_id) VALUES (?, ?, ?, ?, ?, ?)`);
 
     // Begin SQL Transaction
     await beginTransaction(db);

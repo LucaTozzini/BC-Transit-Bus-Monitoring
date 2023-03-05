@@ -1,5 +1,4 @@
-import openDatabase from "../helpers/open-database.helpers.js";
-const db = openDatabase();
+import db from '../helpers/database-pool.helpers.js';
 
 function upcomingBuses(req, res, next){
     const stopCode = parseInt(req.params.stopCode);
@@ -28,7 +27,7 @@ function upcomingBuses(req, res, next){
     db.all(`
         SELECT st.*, g.arrival_time AS updated_time, t.headsign, r.short_name, r.name, st.departure_time, c.*, s.code, s.name
         FROM stop_times AS st 
-        LEFT JOIN gtf_trips AS g ON st.trip_id = g.trip_id AND st.stop_id = g.stop_id
+        LEFT JOIN gtf_trips AS g ON st.trip_id = g.trip_id AND st.stop_id = g.stop_id AND st.provider = g.provider
         JOIN stops AS s ON s.id = st.stop_id AND s.provider = st.provider
         JOIN trips AS t ON st.trip_id = t.id AND t.provider = t.provider
         JOIN routes AS r ON t.route_id = r.id AND t.provider = r.provider
@@ -52,7 +51,6 @@ function upcomingBuses(req, res, next){
                 console.error(err.message);
                 return res.sendStatus(500);
             }
-            console.log(rows)
             res.locals.upcoming = rows;
             next()
         }

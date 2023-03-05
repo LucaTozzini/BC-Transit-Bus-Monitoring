@@ -31,12 +31,12 @@ button{
 }
 
 #sidePanel{
-    width: 22rem;
+    width: 20rem;
     
-    background-color: white;
+    /* background-color: white; */
     
     border-left: .07rem solid rgb(214, 214, 214);
-    padding: 2rem;
+    padding: 1.2rem 1rem;
     padding-bottom: 0;
     
     display: flex;

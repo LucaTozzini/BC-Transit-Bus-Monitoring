@@ -1,5 +1,4 @@
-import openDatabase from "../helpers/open-database.helpers.js";
-const db = openDatabase()
+import db from '../helpers/database-pool.helpers.js';
 
 function getPositions(req, res, next){
     db.all('SELECT * FROM gtf_positions', (err, rows) => {
