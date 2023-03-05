@@ -126,9 +126,6 @@ async function save(){
         for(const trip of tripsData){
             await insertRow(tripsPrep, trip);
         }
-        
-        // Commit Database
-        await commitToDatabase(db);
 
         // Switch Tables
         await renameTable(db, 'gtf_positions', 'gtf_positions_backup');
@@ -138,6 +135,9 @@ async function save(){
         await renameTable(db, 'gtf_trips', 'gtf_trips_backup');
         await renameTable(db, 'gtf_trips_tmp', 'gtf_trips');
         await dropTable(db, 'gtf_trips_backup');
+
+        // Commit Database
+        await commitToDatabase(db);
 
         // Return Created Status
         return {status: 201};
