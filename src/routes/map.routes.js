@@ -23,80 +23,59 @@ router.get('/upcoming/buses/:stopCode/:provider',
     (req, res) => {
         const upcoming = res.locals.upcoming;
 
-        let html = ''
+        let partialInfo = {
+            header: {
+                title: res.locals.validStopCode ? res.locals.stop.name : 'No Stop Found',
+                code: res.locals.stop.code
+            },
+            upcoming: []
+        };
+
         for(const bus of upcoming){
-            // .toString().padStart(2, '0')
             let schHour = parseInt(bus.departure_time.split(':')[0]);
             if(schHour > 23){
                 schHour = schHour - 24
             }
             const schMinute = parseInt(bus.departure_time.split(':')[1]);
 
-            let timeHtml = `
-                <div class="result-time">
-                    <div class="result-time-arrival">${schHour.toString().padStart(2, '0')}:${schMinute.toString().padStart(2, '0')}</div>
-                    <div class="result-time-punctuality">Scheduled</div> 
-                </div>
-            `;
+            let arrivalTimeText = `${schHour.toString().padStart(2, '0')}:${schMinute.toString().padStart(2, '0')}`;
+            let punctualityText = 'Scheduled';
+            let punctualityClass = '';
+            const titleText = bus.headsign;
 
             if(bus.updated_time != null){
                 const rtDate = new Date(bus.updated_time * 1000);
                 const rtHour = rtDate.getHours();
                 const rtMinute = rtDate.getMinutes();
+                const punct = ((schHour * 60) + schMinute) - ((rtHour * 60) + rtMinute);
 
-                let punctuality = ((schHour * 60) + schMinute) - ((rtHour * 60) + rtMinute);
-
-                if(punctuality == 0){
-                    timeHtml = `
-                        <div class="result-time">
-                            <div class="result-time-arrival">${schHour.toString().padStart(2, '0')}:${schMinute.toString().padStart(2, '0')}</div>
-                            <div class="result-time-punctuality onTime">On Time</div> 
-                        </div>
-                    `;    
+                if(punct == 0){
+                    arrivalTimeText = `${schHour.toString().padStart(2, '0')}:${schMinute.toString().padStart(2, '0')}`;
+                    punctualityText = 'On Time';
+                    punctualityClass = 'onTime';
                 }
-                else if(punctuality < 0){
-                    timeHtml = `
-                        <div class="result-time">
-                            <div class="result-time-arrival">${rtHour.toString().padStart(2, '0')}:${rtMinute.toString().padStart(2, '0')}</div>
-                            <div class="result-time-punctuality Late">${Math.abs(punctuality)} Minutes Late</div> 
-                        </div>
-                    `;
-                }
-                else if(punctuality > 0){
-                    timeHtml = `
-                        <div class="result-time">
-                            <div class="result-time-arrival">${rtHour.toString().padStart(2, '0')}:${rtMinute.toString().padStart(2, '0')}</div>
-                            <div class="result-time-punctuality Early">${Math.abs(punctuality)} Minutes Early</div> 
-                        </div>
-                    `;
-                }
+                else if(punct < 0){
+                    arrivalTimeText = `${rtHour.toString().padStart(2, '0')}:${rtMinute.toString().padStart(2, '0')}`;
+                    punctualityText = `${Math.abs(punct)} Minutes Late`;
+                    punctualityClass = 'Late';
 
-
+                }
+                else if(punct > 0){
+                    arrivalTimeText = `${rtHour.toString().padStart(2, '0')}:${rtMinute.toString().padStart(2, '0')}`;
+                    punctualityText = `${Math.abs(punct)} Minutes Early`;
+                    punctualityClass = 'Early';
+                }
             }
-            
-            html += `
-                <div class="bus-result">
-                    ${timeHtml}
-                    <div>${bus.headsign}</div>
-                </div>
-            `
-        }
 
-        if(html == ''){
-            html = '<div class="bus-result">No Upcoming Buses</div>'
+            partialInfo.upcoming.push({
+                titleText,
+                arrivalTimeText,
+                punctualityClass,
+                punctualityText
+            })
         }
-
-        const fullHtml = `
-            <div id="result-header">
-                <div id="result-title"> ${res.locals.validStopCode  ? `${res.locals.stop.name} <span id="title-code"> (${res.locals.stop.code}) </span>` : 'No Stop Found'} </div>
-                <button id="clear-button" onclick="panelSet.clear()"></div>
-            </div>
-            <div id="bus-results">
-                ${html}
-            </div>
-        `
         
-        res.status(200).send(fullHtml)
+        res.render('partials/map-results', {header: partialInfo.header, upcoming: partialInfo.upcoming, upcomingType: 'Buses'});
     }
 );
 
@@ -104,34 +83,25 @@ router.get('/upcoming/stops/:vehicleId/:provider',
     upcomingStops,
     (req, res) => {
         const upcoming = res.locals.upcomingStops;
-        let html = '';
+
+        let partialInfo = {
+            header: {
+                title: upcoming.length > 0 ? upcoming[0].headsign : 'Not In Service',
+                code: upcoming[0].vehicle_id
+            },
+            upcoming: []
+        };
+
         for(const stop of upcoming){
-            html += `
-                <div class="bus-result">
-                    <div class="result-time">
-                        <div class="result-time-arrival">${stop.departure_time.split(':')[0]}:${stop.departure_time.split(':')[1]}</div>
-                        <div class="result-time-punctuality"> Scheduled </div> 
-                    </div>
-                    <div>${stop.name}</div>
-                </div>
-            `
+            partialInfo.upcoming.push({
+                titleText: stop.name,
+                arrivalTimeText: `${stop.departure_time.split(':')[0]}:${stop.departure_time.split(':')[1]}`,
+                punctualityClass: '',
+                punctualityText: 'Scheduled'
+            })
         }
 
-        if(html == ''){
-            html = '<div class="bus-result">No Upcoming Stops</div>'
-        }
-
-        const fullHtml = `
-            <div id="result-header">
-                <div id="result-title"> ${upcoming.length > 0 ? `${upcoming[0].headsign} <span id="title-code"> (${upcoming[0].vehicle_id}) </span>` : 'No Stop Found'} </div>
-                <button id="clear-button" onclick="panelSet.clear()"></div>
-            </div>
-            <div id="bus-results">
-                ${html}
-            </div>
-        `
-
-        res.status(200).send(fullHtml)
+        res.render('partials/map-results', {header: partialInfo.header, upcoming: partialInfo.upcoming, upcomingType: 'Stops'});
     }
 )
 

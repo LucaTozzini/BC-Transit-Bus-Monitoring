@@ -28,7 +28,7 @@ function gtfsPosition(){
             })
             positions.push(entity);
         }
-        positions = positions.reduce((acc, cur) => acc.concat(cur), []).filter(object => object.vehicle.stopId > 0);
+        positions = positions.reduce((acc, cur) => acc.concat(cur), []).filter(obj => obj.vehicle.stopId > 0 && obj.vehicle.hasOwnProperty('position') && obj.vehicle.hasOwnProperty('trip'));
         resolve(positions)
     })
 }

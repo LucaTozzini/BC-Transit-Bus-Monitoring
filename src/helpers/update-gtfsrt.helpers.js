@@ -66,7 +66,10 @@ async function save(){
         // Fetch Data From BC Transit
         const positions = await gtfsPosition();
         const trips = await gtfsTrip();
-        
+       
+        // Begin Trasaction
+        await beginTransaction(db);
+
         // Set Up Table
         await dropTable(db, 'gtf_positions_tmp');
         await dropTable(db, 'gtf_trips_tmp');
@@ -74,15 +77,12 @@ async function save(){
             throw new Error('Error Creating Tables');
         }
 
-        // Begin Trasaction
-        await beginTransaction(db);
-
         // Filter Position Data
         const positionData = positions.map((bus) => [
             parseInt(bus.id),
             bus.provider,
-            bus.vehicle.trip ? parseInt(bus.vehicle.trip.tripId) : null,
-            bus.vehicle.trip ? parseInt(bus.vehicle.trip.routeId) : null,
+            parseInt(bus.vehicle.trip.tripId),
+            parseInt(bus.vehicle.trip.routeId),
             parseFloat(bus.vehicle.position.latitude),
             parseFloat(bus.vehicle.position.longitude),
             parseInt(bus.vehicle.position.bearing),
@@ -146,7 +146,7 @@ async function save(){
     // If An Error Occurs
     // Return Internal Server Error Status
     catch(err){
-        console.error(err.message);
+        console.error(345, err);
         db.run(`ROLLBACK`, (err) => {
             if(err){
                 console.error(err);

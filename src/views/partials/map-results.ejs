@@ -1,0 +1,31 @@
+<div id="result-header">
+    
+    <div id="result-title"> 
+        <%= header.title %> 
+        <span id="title-code"> 
+            (<%= header.code %>) 
+        </span> 
+    </div>
+    
+    <button id="clear-button" onclick="panelSet.clear()"></button>
+
+</div>
+
+<div id="bus-results">
+    
+    <% if(upcoming.length == 0){ %>
+        <div class="bus-result">
+            <div style="width: 100%; text-align: center;"> No Upcoming <%= upcomingType %> </div>
+        </div>
+    <% } %>
+    <% for(const item of upcoming){ console.log(item) %>
+        <div class="bus-result">
+            <div class="result-time">
+                <div class="result-time-arrival"> <%= item.arrivalTimeText %> </div>
+                <div class="result-time-punctuality <%= item.punctualityClass %>"><%= item.punctualityText %></div> 
+            </div>
+            <div> <%= item.titleText %> </div>
+        </div>
+    <% } %>
+
+</div>
